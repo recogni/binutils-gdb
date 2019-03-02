@@ -1,5 +1,12 @@
 2019-10-18  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (struct minimal_symbol) <name_set>: New member.
+	* minsyms.c (minimal_symbol_reader::record_full): Copy name.
+	Don't call symbol_set_names.
+	(minimal_symbol_reader::install): Call symbol_set_names.
+
+2019-10-18  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* configure.ac: Don't check for sigprocmask.
 	* gdbsupport/common.m4 (GDB_AC_COMMON): Check for sigprocmask.
