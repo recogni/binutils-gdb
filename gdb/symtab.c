@@ -759,13 +759,9 @@ create_demangled_names_hash (struct objfile_per_bfd_storage *per_bfd)
      NULL, xcalloc, xfree));
 }
 
-/* Try to determine the demangled name for a symbol, based on the
-   language of that symbol.  If the language is set to language_auto,
-   it will attempt to find any demangling algorithm that works and
-   then set the language appropriately.  The returned name is allocated
-   by the demangler and should be xfree'd.  */
+/* See symtab.h  */
 
-static char *
+char *
 symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 			    const char *mangled)
 {
@@ -867,8 +863,16 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       || (gsymbol->language == language_go
 	  && (*slot)->demangled[0] == '\0'))
     {
+      /* The const_cast is safe because the only reason it is already
+         initialized is if we purposefully set it from a background
+         thread to avoid doing the work here.  However, it is still
+         allocated from the heap and needs to be freed by us, just
+         like if we called symbol_find_demangled_name here.  */
       char *demangled_name_ptr
-	= symbol_find_demangled_name (gsymbol, linkage_name_copy);
+        = (gsymbol->language_specific.demangled_name
+	   ? const_cast<char *> (gsymbol->language_specific.demangled_name)
+	   : symbol_find_demangled_name (gsymbol, linkage_name_copy));
+
       gdb::unique_xmalloc_ptr<char> demangled_name (demangled_name_ptr);
       int demangled_len = demangled_name ? strlen (demangled_name.get ()) : 0;
 
