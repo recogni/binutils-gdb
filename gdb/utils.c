@@ -3436,6 +3436,14 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
     }
 }
 
+/* See utils.h.  */
+
+unsigned int
+fast_hash (const char* str, size_t len)
+{
+  return iterative_hash (str, len, 0);
+}
+
 void
 _initialize_utils (void)
 {
