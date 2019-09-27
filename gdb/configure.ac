@@ -2217,6 +2217,25 @@ else
   fi
 fi
 
+# Check for xxhash
+AC_ARG_WITH(xxhash,
+  AC_HELP_STRING([--with-xxhash], [use libxxhash for hashing (faster) (auto/yes/no)]),
+  [], [with_xxhash=auto])
+AC_MSG_CHECKING([whether to use xxhash])
+AC_MSG_RESULT([$with_xxhash])
+
+if test "x$with_xxhash" != "xno"; then
+  AC_LIB_HAVE_LINKFLAGS([xxhash], [],
+			[#include <xxhash.h>],
+			[XXH32("foo", 3, 0);
+			])
+  if test "$HAVE_XXHASH" != yes; then
+     if test "$with_xxhash" = yes; then
+       AC_MSG_ERROR([xxhash is missing or unusable])
+     fi
+  fi
+fi
+
 # If nativefile (NAT_FILE) is not set in configure.nat, we link to an
 # empty version.
 

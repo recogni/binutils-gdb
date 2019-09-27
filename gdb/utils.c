@@ -36,6 +36,10 @@
 #include <pc.h>
 #endif
 
+#ifdef HAVE_LIBXXHASH
+#include <xxhash.h>
+#endif
+
 #include <signal.h>
 #include "gdbcmd.h"
 #include "serial.h"
@@ -3441,7 +3445,11 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 unsigned int
 fast_hash (const char* str, size_t len)
 {
+#ifdef HAVE_LIBXXHASH
+  return XXH64 (str, len, 0);
+#else
   return iterative_hash (str, len, 0);
+#endif
 }
 
 void
