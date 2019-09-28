@@ -1,3 +1,8 @@
+2019-10-18  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* aclocal.m4: Use m4_include, not sinclude.
+
 2019-10-17  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.fortran/module.exp: Allow info variables to print info for files
