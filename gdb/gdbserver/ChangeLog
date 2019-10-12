@@ -4,6 +4,10 @@
 
 2019-10-18  Tom Tromey  <tom@tromey.com>
 
+	* configure, config.in: Rebuild.
+
+2019-10-18  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (PTHREAD_CFLAGS, PTHREAD_LIBS): New variables.
 	(INTERNAL_CFLAGS_BASE): Use PTHREAD_CFLAGS.
 	(GDBSERVER_LIBS): Use PTHREAD_LIBS.
