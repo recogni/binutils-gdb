@@ -40,6 +40,7 @@
 #include <atomic>
 #include "event-top.h"
 #include "ser-event.h"
+#include "gdbsupport/gdb-sigmask.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -1586,7 +1587,7 @@ gdb_demangle (const char *name, int options)
 	  sigset_t segv_sig_set;
 	  sigemptyset (&segv_sig_set);
 	  sigaddset (&segv_sig_set, SIGSEGV);
-	  sigprocmask (SIG_UNBLOCK, &segv_sig_set, NULL);
+	  gdb_sigmask (SIG_UNBLOCK, &segv_sig_set, NULL);
 #endif
 
 	  /* If there was a failure, we can't report it here, because

@@ -1,5 +1,19 @@
 2019-10-18  Tom Tromey  <tom@tromey.com>
 
+	* gdbsupport/signals-state-save-restore.c (original_signal_mask):
+	Remove comment.
+	(save_original_signals_state, restore_original_signals_state): Use
+	gdb_sigmask.
+	* linux-nat.c (block_child_signals, restore_child_signals_mask)
+	(_initialize_linux_nat): Use gdb_sigmask.
+	* guile/guile.c (_initialize_guile): Use gdb_sigmask.
+	* Makefile.in (HFILES_NO_SRCDIR): Add gdb-sigmask.h.
+	* gdbsupport/gdb-sigmask.h: New file.
+	* event-top.c (async_sigtstp_handler): Use gdb_sigmask.
+	* cp-support.c (gdb_demangle): Use gdb_sigmask.
+
+2019-10-18  Tom Tromey  <tom@tromey.com>
+
 	* gdbsupport/thread-pool.c (thread_pool::set_thread_count): Set
 	name of worker thread.
 	* gdbsupport/common.m4 (GDB_AC_COMMON): Check for

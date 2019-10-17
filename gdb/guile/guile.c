@@ -36,6 +36,7 @@
 #include "guile-internal.h"
 #endif
 #include <signal.h>
+#include "gdbsupport/gdb-sigmask.h"
 
 /* The Guile version we're using.
    We *could* use the macros in libguile/version.h but that would preclude
@@ -821,7 +822,7 @@ _initialize_guile (void)
        libgc 7.4.x.  */
     sigemptyset (&sigchld_mask);
     sigaddset (&sigchld_mask, SIGCHLD);
-    sigprocmask (SIG_BLOCK, &sigchld_mask, &prev_mask);
+    gdb_sigmask (SIG_BLOCK, &sigchld_mask, &prev_mask);
 #endif
 
     /* scm_with_guile is the most portable way to initialize Guile.
@@ -830,7 +831,7 @@ _initialize_guile (void)
     scm_with_guile (call_initialize_gdb_module, NULL);
 
 #ifdef HAVE_SIGPROCMASK
-    sigprocmask (SIG_SETMASK, &prev_mask, NULL);
+    gdb_sigmask (SIG_SETMASK, &prev_mask, NULL);
 #endif
 
     /* Set Guile's backtrace to match the "set guile print-stack" default.
