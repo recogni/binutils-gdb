@@ -1172,7 +1172,6 @@ COMMON_SFILES = \
 # Links made at configuration time should not be specified here, since
 # SFILES is used in building the distribution archive.
 SFILES = \
-	ada-exp.y \
 	arch/i386.c \
 	c-exp.y \
 	cp-name-parser.y \
@@ -1648,7 +1647,7 @@ generated_files = \
 # Flags needed to compile Python code
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
 
-all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb
+all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb libgdb.a
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.

@@ -70,6 +70,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
 CC = @CC@
+CXX = @CXX@
 CC_FOR_BUILD = @CC_FOR_BUILD@
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
@@ -234,7 +235,7 @@ CONFIG_CFLAGS = \
 CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
-  -I../../opcodes -I$(srcroot)/opcodes \
+  -I../../opcodes -I$(srcroot)/opcodes -I../../gdb \
   @INCINTL@
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(CFLAGS)
 BUILD_CFLAGS = -g -O $(CSEARCH)
