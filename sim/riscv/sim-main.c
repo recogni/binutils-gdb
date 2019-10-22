@@ -2167,29 +2167,29 @@ execute_one (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
   else if (op->xlen_requirement == 64)
     RISCV_ASSERT_RV64 (cpu, "insn: %s", op->name);
     
-  /* We need the last non-zero subset, since compressed float instructions
-     are handled by execute_c, and are listed as 'F' then 'C'.  */
-  for (index = MAX_SUBSET_NUM-1; index >= 0; index--)
-    if (op->subset[index])
-      break;
-
-  switch (op->subset[index][0])
+  switch (op->insn_class)
     {
-    case 'A':
+    case INSN_CLASS_A:
       return execute_a (cpu, iw, op);
-    case 'C':
+    case INSN_CLASS_C:
       return execute_c (cpu, iw, op);
-    case 'D':
+    case INSN_CLASS_D_AND_C:
+      return execute_c (cpu, iw, op);
+    case INSN_CLASS_D:
       return execute_d (cpu, iw, op);
-    case 'F':
+    case INSN_CLASS_F:
       return execute_f (cpu, iw, op);
-    case 'I':
+    case INSN_CLASS_F_AND_C:
+      return execute_c (cpu, iw, op);
+    case INSN_CLASS_I:
       return execute_i (cpu, iw, op);
-    case 'M':
+    case INSN_CLASS_M:
       return execute_m (cpu, iw, op);
-    case_default:
+    case INSN_CLASS_Q:
+	/* FALLTHROUGH */
+     case_default:
     default:
-      TRACE_INSN (cpu, "UNHANDLED EXTENSION: %s", op->subset[index]);
+      TRACE_INSN (cpu, "UNHANDLED EXTENSION: %i", op->insn_class);
       sim_engine_halt (sd, cpu, NULL, cpu->pc, sim_signalled, SIM_SIGILL);
     }
 

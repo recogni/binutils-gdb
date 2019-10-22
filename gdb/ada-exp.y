@@ -33,6 +33,9 @@
    too messy, particularly when such includes can be inserted at random
    times by the parser generator.  */
 
+
+%define api.prefix {ada_}
+
 %{
 
 #include "defs.h"
@@ -49,11 +52,6 @@
 #include "block.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())
-
-/* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
-   etc).  */
-#define GDB_YY_REMAP_PREFIX ada_
-#include "yy-remap.h"
 
 struct name_info {
   struct symbol *sym;
@@ -709,14 +707,6 @@ primary	:	'*' primary		%prec '.'
 /* in gdb.  */
 
 /* (See note above on previous definitions for YACC.) */
-
-#define yy_create_buffer ada_yy_create_buffer
-#define yy_delete_buffer ada_yy_delete_buffer
-#define yy_init_buffer ada_yy_init_buffer
-#define yy_load_buffer_state ada_yy_load_buffer_state
-#define yy_switch_to_buffer ada_yy_switch_to_buffer
-#define yyrestart ada_yyrestart
-#define yytext ada_yytext
 
 static struct obstack temp_parse_space;
 
