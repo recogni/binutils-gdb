@@ -6,8 +6,6 @@
 /version.c
 /xml-builtin.c
 
-/ada-exp.c
-/ada-lex.c
 /c-exp.c
 /cp-name-parser.c
 /d-exp.c
