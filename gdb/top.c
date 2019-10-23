@@ -89,7 +89,7 @@ extern void initialize_all_files (void);
 /* Default command line prompt.  This is overridden in some configs.  */
 
 #ifndef DEFAULT_PROMPT
-#define DEFAULT_PROMPT	"(gdb) "
+#define DEFAULT_PROMPT	"(gdbsim) "
 #endif
 
 struct ui_file **
