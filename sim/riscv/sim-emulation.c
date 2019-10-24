@@ -7,11 +7,11 @@
 
 #include "main.h"
 
-char *fake_arg = "GDB Simulation";
-void sim_emulation_setup(void (*tick_cb)(int ticks, void *clk), void *clk) {
+void sim_emulation_setup(int argc, char **argv,
+			 void (*tick_cb)(int ticks, void *clk), void *clk) {
     struct captured_main_args args;
-    args.argc = 1;
-    args.argv = &fake_arg;
+    args.argc = argc;
+    args.argv = argv;
     args.interpreter_p = "console";
     
     tick_wait = tick_cb;

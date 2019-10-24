@@ -45,7 +45,7 @@ sim_load (SIM_DESC sd, const char *prog_name, struct bfd *prog_bfd, int from_tty
 			      STATE_CALLBACK (sd),
 			      prog_name,
 			      STATE_PROG_BFD (sd),
-			      STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG,
+			      0, //STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG,
 			      STATE_LOAD_AT_LMA_P (sd),
 			      sim_write);
   if (result_bfd == NULL)

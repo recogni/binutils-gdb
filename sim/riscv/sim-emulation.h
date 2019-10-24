@@ -13,7 +13,8 @@ extern "C"
 } // extern "C"
 
 // C++ only routines that get called from systemC
-extern void sim_emulation_setup(void (*tick_cb)(int, void*), void *clk);
+extern void sim_emulation_setup(int argc, char **argv,
+				void (*tick_cb)(int, void*), void *clk);
 extern void sim_emulation_fini(void);
 //extern void sim_emulation_set_reg_write_callback(std::function<int (unsigned long long,
 //  							              unsigned long long)> fn);
