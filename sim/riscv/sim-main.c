@@ -1775,6 +1775,7 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 		break;
 	      }
 #endif
+#endif
 	    case TARGET_SYS_brk:
 	      {
 		/* FIXME: Check the invalid access.  */
@@ -1815,7 +1816,6 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 		cpu->a0 = rv;
 		break;
 	      }
-#endif	      
 	    default:
 	      cpu->a0 = sim_syscall (cpu, cpu->a7, cpu->a0,
 				     cpu->a1, cpu->a2, cpu->a3);
