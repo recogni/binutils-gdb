@@ -35,8 +35,13 @@
 #include "sim-options.h"
 #include "sim-emulation.h"
 
-void (*tick_wait)(int, void *clk) = NULL;
-void *tick_clk = NULL;
+void *gdbSP = NULL;
+void (*register_sd_cb)(void *, void *) = NULL;
+void (*tick_cb)(void *, int) = NULL;
+unsigned long long (*read_reg_cb)(void *sp,
+				  unsigned long long addr) = NULL;
+void (*write_reg_cb)(void *sp, unsigned long long addr,
+		     unsigned long long val) = NULL;
 
 
 /* This function is the main loop.  It should process ticks and decode+execute
@@ -58,8 +63,8 @@ sim_engine_run (SIM_DESC sd,
 
   while (1)
     {
-      if (tick_wait != NULL) {
-	  tick_wait(1, tick_clk);
+      if (tick_cb != NULL) {
+	  tick_cb(gdbSP, 1);
       } 
       step_once (cpu);
       if (sim_events_tick (sd))
@@ -204,6 +209,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   Elf_Internal_Phdr *phdr;
   int i, phnum;
 
+  /* Tell systemc where to find us */
+  register_sd_cb(gdbSP, (void *) sd);
+  
   /* Set the PC.  */
   if (abfd != NULL)
     addr = bfd_get_start_address (abfd);

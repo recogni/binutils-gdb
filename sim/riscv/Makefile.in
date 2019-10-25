@@ -46,6 +46,6 @@ sim-extra-clean:
 SIM_EXTRA_CLEAN = sim-extra-clean
 
 CFLAGS += -I../../gdb
-CXXFLAGS += -I../../gdb -DHAVE_CONFIG_H $(CSEARCH)
+CXXFLAGS += -DHAVE_CONFIG_H $(CSEARCH) -I../../gdb
 
 ## COMMON_POST_CONFIG_FRAG

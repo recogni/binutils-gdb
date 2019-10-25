@@ -1,24 +1,41 @@
 /* RISC-V simulator.
  */
 
-#include "sim-basics.h"
+
+#include "config.h"
+#include <inttypes.h>
+#include <time.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/time.h>
 
 #include "sim-emulation.h"
 
 #include "main.h"
 
-void sim_emulation_setup(int argc, char **argv,
-			 void (*tick_cb)(int ticks, void *clk), void *clk) {
+void *sim_emulation_setup(int argc, char **argv,
+			  void *gdbServiceProcessor,
+			  void (*register_sd)(void *sp, void *sd),
+			  void (*tick)(void *sp, int ticks),
+			  unsigned long long (*read_reg)(void *sp,
+							 unsigned long long addr),
+			  void (*write_reg)(void *sp, unsigned long long addr,
+					    unsigned long long val)
+			  ) {
     struct captured_main_args args;
     args.argc = argc;
     args.argv = argv;
     args.interpreter_p = "console";
+
+    gdbSP = gdbServiceProcessor;
+
+    tick_cb = tick;
+    register_sd_cb = register_sd;
+    read_reg_cb = read_reg;
+    write_reg_cb = write_reg;
     
-    tick_wait = tick_cb;
-    tick_clk = clk;
     gdb_main(&args);
 }
-    
 
 void sim_emulation_fini(void) {
 }
