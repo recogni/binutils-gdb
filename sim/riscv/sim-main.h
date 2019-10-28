@@ -72,6 +72,16 @@ struct _sim_cpu {
 #undef DECLARE_CSR
   } csr;
 
+  /* System C callback into */
+  void *gdbSP;
+  void (*register_sd_cb)(void *, void *);
+  void (*tick_cb)(void *, int);
+  unsigned long long (*read_reg_cb)(void *sp,
+				    unsigned long long addr);
+  void (*write_reg_cb)(void *sp, unsigned long long addr,
+		       unsigned long long val);
+
+
   sim_cpu_base base;
 };
 
@@ -87,6 +97,7 @@ struct sim_state {
 
   /* ... simulator specific members ... */
   sim_state_base base;
+
 };
 
 extern void step_once (SIM_CPU *);

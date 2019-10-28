@@ -63,8 +63,8 @@ sim_engine_run (SIM_DESC sd,
 
   while (1)
     {
-      if (tick_cb != NULL) {
-	  tick_cb(gdbSP, 1);
+      if (cpu->tick_cb != NULL) {
+	  cpu->tick_cb(cpu->gdbSP, 1);
       } 
       step_once (cpu);
       if (sim_events_tick (sd))
@@ -209,8 +209,14 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   Elf_Internal_Phdr *phdr;
   int i, phnum;
 
+  /* Copy the systemC callback info out of the static variables */
+  cpu->gdbSP = gdbSP;
+  cpu->tick_cb = tick_cb;
+  cpu->read_reg_cb = read_reg_cb;
+  cpu->write_reg_cb = write_reg_cb;
+  
   /* Tell systemc where to find us */
-  register_sd_cb(gdbSP, (void *) sd);
+  register_sd_cb(cpu->gdbSP, (void *) sd);
   
   /* Set the PC.  */
   if (abfd != NULL)

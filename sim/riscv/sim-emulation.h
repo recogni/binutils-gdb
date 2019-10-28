@@ -5,7 +5,13 @@
 extern "C"
 {
 #endif
-    
+
+/*
+ * Temporary copies of systemC callback info.  This gets moved to sim_state
+ * in sim_create_inferior so that we can have multiple CPUs in the design.  But
+ * the use of these static variables means that means that only
+ * one CPU can be initialized at a time.
+ */
 extern void *gdbSP;
 extern void (*register_sd_cb)(void *, void *);
 extern void (*tick_cb)(void *, int);
