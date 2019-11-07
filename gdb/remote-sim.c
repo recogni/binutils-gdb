@@ -126,6 +126,13 @@ struct gdbsim_target final
 
   bool has_all_memory ()  override;
   bool has_memory ()  override;
+
+  bool can_async_p () override;
+
+  bool is_async_p () override;
+
+  void async (int) override;
+
 };
 
 static struct gdbsim_target gdbsim_ops;
@@ -669,7 +676,7 @@ gdbsim_target::create_inferior (const char *exec_file,
    Targets should supply this routine, if only to provide an error message.  */
 /* Called when selecting the simulator.  E.g. (gdb) target sim name.  */
 
-static void
+void
 gdbsim_target_open (const char *args, int from_tty)
 {
   int len;
@@ -1293,6 +1300,24 @@ gdbsim_target::has_memory ()
 
   return true;
 }
+
+bool
+gdbsim_target::can_async_p ()
+{
+    return false;
+}
+
+bool
+gdbsim_target::is_async_p ()
+{
+    return false;
+}
+
+void
+gdbsim_target::async ( int enable)
+{
+}
+
 
 void
 _initialize_remote_sim (void)

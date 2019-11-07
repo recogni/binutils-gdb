@@ -24,7 +24,7 @@ extern void (*write_reg_cb)(void *sp, unsigned long long addr,
 } // extern "C"
 
 // C++ only routines that get called from systemC
-extern void *sim_emulation_setup(
+extern void sim_emulation_start_gdb(
 	       int argc, char **argv,
 	       void *gdbServiceProcessor,
 	       void (*register_sd)(void *sp, void *sd),
@@ -35,7 +35,12 @@ extern void *sim_emulation_setup(
 				 unsigned long long val)
 				);
 
+extern void sim_emulation_add(void *gdbServiceProcessor, char *sim_program);
+
+//extern void sim_command_loop(void);
+
 extern void sim_emulation_fini(void);
+
 //extern void sim_emulation_set_reg_write_callback(std::function<int (unsigned long long,
 //  							              unsigned long long)> fn);
 extern int sim_emulation_pin_get(char * pin_type, unsigned pin_instance);

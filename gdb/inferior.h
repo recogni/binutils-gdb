@@ -204,7 +204,7 @@ extern void set_inferior_args_vector (int, char **);
 
 extern void registers_info (const char *, int);
 
-extern void continue_1 (int all_threads);
+extern void continue_1 (int all_threads, int all_inferiors);
 
 extern void interrupt_target_1 (int all_threads);
 
@@ -506,6 +506,8 @@ public:
    modules.  */
 
 DECLARE_REGISTRY (inferior);
+
+extern void add_inferior_exec (const char *exec);
 
 /* Add an inferior to the inferior list, print a message that a new
    inferior is found, and return the pointer to the new inferior.

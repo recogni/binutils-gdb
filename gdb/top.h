@@ -238,6 +238,8 @@ extern void quit_command (const char *, int);
 extern void quit_cover (void);
 extern void execute_command (const char *, int);
 
+extern void gdbsim_target_open (const char *args, int from_tty);
+
 /* If the interpreter is in sync mode (we're running a user command's
    list, running command hooks or similars), and we just ran a
    synchronous command that started the target, wait for that command

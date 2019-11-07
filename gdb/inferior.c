@@ -685,6 +685,27 @@ add_inferior_with_spaces (void)
   return inf;
 }
 
+void
+add_inferior_exec (const char *exec)
+{
+
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
+  
+  struct inferior *inf = add_inferior_with_spaces ();
+
+  printf_filtered (_("Added inferior %d\n"), inf->num);
+
+  /* Switch over temporarily, while reading executable and
+     symbols.q.  */
+  set_current_program_space (inf->pspace);
+  set_current_inferior (inf);
+  switch_to_no_thread ();
+
+  exec_file_attach (exec, 0);
+  symbol_file_add_main (exec, 0);
+}
+
+
 /* add-inferior [-copies N] [-exec FILENAME]  */
 
 static void

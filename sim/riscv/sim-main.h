@@ -92,7 +92,9 @@ struct atomic_mem_reserved_list {
 };
 
 struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
+    struct sim_state *sim_state_next;
+    sim_cpu *cpu[MAX_NR_PROCESSORS];
+    
   struct atomic_mem_reserved_list *amo_reserved_list;
 
   /* ... simulator specific members ... */

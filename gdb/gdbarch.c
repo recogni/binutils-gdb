@@ -5355,10 +5355,13 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
        curr = &(*curr)->next)
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
+	  return;
+#if 0	      
 	internal_error (__FILE__, __LINE__,
                         _("gdbarch: Duplicate registration "
 			  "of architecture (%s)"),
 	                bfd_arch_info->printable_name);
+#endif	
     }
   /* log it */
   if (gdbarch_debug)

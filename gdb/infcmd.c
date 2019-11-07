@@ -55,6 +55,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "source.h"
 #include "cli/cli-style.h"
+#include "progspace-and-thread.h"
 
 /* Local functions: */
 
@@ -519,10 +520,10 @@ prepare_execution_command (struct target_ops *target, int background)
 {
   /* If we get a request for running in the bg but the target
      doesn't support it, error out.  */
-  if (background && !target->can_async_p ())
-    error (_("Asynchronous execution not supported on this target."));
+    //  if (background && !target->can_async_p ())
+    // error (_("Asynchronous execution not supported on this target."));
 
-  if (!background)
+    //if (!background)
     {
       /* If we get a request for running in the fg, then we need to
 	 simulate synchronous (fg) execution.  Note no cleanup is
@@ -760,8 +761,27 @@ ensure_not_running (void)
     error_is_running ();
 }
 
+static int
+proceed_inferior_callback (struct inferior *inf, void *arg)
+{
+  if (inf != current_inferior ())
+  {
+    thread_info *tp = any_thread_of_inferior (inf);
+    if (tp == NULL)
+      error (_("Inferior has no threads."));
+
+    switch_to_thread (tp);
+  }
+  set_current_inferior(inf);
+  ensure_valid_thread ();
+  ensure_not_running ();
+  clear_proceed_status (0);
+  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
+  return 0;
+}
+
 void
-continue_1 (int all_threads)
+continue_1 (int all_threads, int all_inferiors)
 {
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
@@ -795,6 +815,11 @@ continue_1 (int all_threads)
 	  target_terminal::inferior ();
 	}
     }
+  else if (all_inferiors)
+      {
+	    scoped_restore_current_pspace_and_thread restore_pspace_thread;
+	  iterate_over_inferiors(proceed_inferior_callback, NULL);
+      }
   else
     {
       ensure_valid_thread ();
@@ -892,7 +917,7 @@ continue_command (const char *args, int from_tty)
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
 
-  continue_1 (all_threads);
+  continue_1 (all_threads, async_exec);
 }
 
 /* Record the starting point of a "step" or "next" command.  */

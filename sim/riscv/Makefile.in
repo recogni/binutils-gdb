@@ -45,7 +45,6 @@ sim-extra-clean:
 
 SIM_EXTRA_CLEAN = sim-extra-clean
 
-CFLAGS += -I../../gdb
-CXXFLAGS += -DHAVE_CONFIG_H $(CSEARCH) -I../../gdb
-
+CFLAGS += -I../../gdb -I../../gnulib/import -I../.. -DSIM_EVENTS_POLL_RATE 1
+CXXFLAGS += -DHAVE_CONFIG_H -DHAVE_DECL_BASENAME=1 $(CSEARCH) -I../../gdb -I../../gnulib/import -I../..
 ## COMMON_POST_CONFIG_FRAG

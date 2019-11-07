@@ -31,6 +31,8 @@
 #include "bfd.h"
 #include "elf-bfd.h"
 
+#include "main.h"
+
 #include "sim-main.h"
 #include "sim-options.h"
 #include "sim-emulation.h"
@@ -43,6 +45,9 @@ unsigned long long (*read_reg_cb)(void *sp,
 void (*write_reg_cb)(void *sp, unsigned long long addr,
 		     unsigned long long val) = NULL;
 
+/* List of SDs */
+struct sim_state *sim_state_head = NULL;
+
 
 /* This function is the main loop.  It should process ticks and decode+execute
    a single instruction.
@@ -50,26 +55,39 @@ void (*write_reg_cb)(void *sp, unsigned long long addr,
    Usually you do not need to change things here.  */
 
 void
-sim_engine_run (SIM_DESC sd,
+sim_engine_run (SIM_DESC start_sd,
 		int next_cpu_nr, /* ignore  */
 		int nr_cpus, /* ignore  */
 		int siggnal) /* ignore  */
 {
   SIM_CPU *cpu;
+  SIM_DESC sd = start_sd;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
-  cpu = STATE_CPU (sd, 0);
+  while (1) {
+      cpu = STATE_CPU (sd, 0);
+      if (cpu) {
+	  if (sd == start_sd) {
+	      if (cpu->tick_cb != NULL) {
+		  cpu->tick_cb(cpu->gdbSP, 1);
+	      } 
+	  }
+	  
+	  step_once (cpu);
+	  if (sim_events_tick (sd))
+	      sim_events_process (sd);
+      }
+      
+      //      if (strcmp(get_inferior_args(),"all") == 0) {
+	  sd = sd->sim_state_next;
+	  if (sd == NULL) {
+	      sd = sim_state_head;
+	  }
+	  //      }
 
-  while (1)
-    {
-      if (cpu->tick_cb != NULL) {
-	  cpu->tick_cb(cpu->gdbSP, 1);
-      } 
-      step_once (cpu);
-      if (sim_events_tick (sd))
-	sim_events_process (sd);
-    }
+  }
+  
 }
 
 /* Initialize the simulator from scratch.  This is called once per lifetime of
@@ -209,12 +227,16 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   Elf_Internal_Phdr *phdr;
   int i, phnum;
 
+  /* Link them up */
+  sd->sim_state_next = sim_state_head;
+  sim_state_head = sd;
+  
   /* Copy the systemC callback info out of the static variables */
   cpu->gdbSP = gdbSP;
   cpu->tick_cb = tick_cb;
   cpu->read_reg_cb = read_reg_cb;
   cpu->write_reg_cb = write_reg_cb;
-  
+
   /* Tell systemc where to find us */
   register_sd_cb(cpu->gdbSP, (void *) sd);
   
@@ -251,6 +273,14 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
     }
 
   initialize_env (sd, (void *)argv, (void *)env);
+
+  if (sim_load(sd,
+	       (STATE_PROG_ARGV (sd) != NULL
+		? *STATE_PROG_ARGV (sd)
+		: NULL), abfd, 0) != SIM_RC_OK)
+      {
+	  return 0;
+      }
 
   return SIM_RC_OK;
 }

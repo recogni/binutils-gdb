@@ -290,7 +290,7 @@ exec_continue (char **argv, int argc)
 	}
       else
 	{
-	  continue_1 (0);
+	    continue_1 (0, 0);
 	}
     }
   else
@@ -300,7 +300,7 @@ exec_continue (char **argv, int argc)
       if (current_context->all)
 	{
 	  sched_multi = 1;
-	  continue_1 (0);
+	  continue_1 (0, 0);
 	}
       else
 	{
@@ -308,7 +308,7 @@ exec_continue (char **argv, int argc)
 	     either all threads, or one thread, depending on the
 	     'scheduler-locking' variable.  Let's continue to do the
 	     same.  */
-	  continue_1 (1);
+	    continue_1 (1, 0);
 	}
     }
 }

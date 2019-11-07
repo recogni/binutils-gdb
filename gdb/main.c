@@ -485,6 +485,7 @@ captured_main_1 (struct captured_main_args *context)
   char *pid_or_core_arg = NULL;
   char *cdarg = NULL;
   char *ttyarg = NULL;
+  char *prompt = NULL;
 
   /* These are static so that we can take their address in an
      initializer.  */
@@ -613,7 +614,8 @@ captured_main_1 (struct captured_main_args *context)
       OPT_IX,
       OPT_IEX,
       OPT_READNOW,
-      OPT_READNEVER
+      OPT_READNEVER,
+      OPT_PROMPT
     };
     /* This struct requires int* in the struct, but write_files is a bool.
        So use this temporary int that we write back after argument parsing.  */
@@ -686,6 +688,7 @@ captured_main_1 (struct captured_main_args *context)
       {"args", no_argument, &set_args, 1},
       {"l", required_argument, 0, 'l'},
       {"return-child-result", no_argument, &return_child_result, 1},
+      {"prompt", required_argument, NULL, OPT_PROMPT},
       {0, no_argument, 0, 0}
     };
 
@@ -857,6 +860,12 @@ captured_main_1 (struct captured_main_args *context)
 	    }
 	    break;
 
+	  case  OPT_PROMPT:
+	      {
+		  prompt = optarg;;
+	      }
+	      break;
+
 	  case '?':
 	    error (_("Use `%s --help' for a complete list of options."),
 		   gdb_program_name);
@@ -881,6 +890,11 @@ captured_main_1 (struct captured_main_args *context)
   /* Initialize all files.  */
   gdb_init (gdb_program_name);
 
+  /* See if there is a prompt override */
+  if (prompt != NULL) {
+      set_prompt(prompt);
+  }
+  
   /* Now that gdb_init has created the initial inferior, we're in
      position to set args for that inferior.  */
   if (set_args)
@@ -1184,6 +1198,7 @@ captured_main_1 (struct captured_main_args *context)
     }
 }
 
+#if 0
 static void
 captured_main (void *data)
 {
@@ -1208,13 +1223,31 @@ captured_main (void *data)
     }
   /* No exit -- exit is through quit_command.  */
 }
+#endif
+
+void
+command_loop (void)
+{
+  while (1)
+    {
+      try
+	{
+	  captured_command_loop ();
+	}
+      catch (const gdb_exception &ex)
+	{
+	  exception_print (gdb_stderr, ex);
+	}
+    }
+  /* No exit -- exit is through quit_command.  */
+}
 
 int
 gdb_main (struct captured_main_args *args)
 {
   try
     {
-      captured_main (args);
+      captured_main_1 (args);
     }
   catch (const gdb_exception &ex)
     {
