@@ -62,31 +62,59 @@ sim_engine_run (SIM_DESC start_sd,
 {
   SIM_CPU *cpu;
   SIM_DESC sd = start_sd;
-
+  sim_engine *start_engine = STATE_ENGINE(sd);
+  jmp_buf *save_jmp;
+  jmp_buf jmpbuf;
+  int jmpval;
+  
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+  cpu = STATE_CPU (sd, 0);
 
+  save_jmp = start_engine->jmpbuf;
+  
   while (1) {
-      cpu = STATE_CPU (sd, 0);
+      if (sd == start_sd) {
+	  if (sd->tick_cb != NULL) {
+	      sd->tick_cb(sd->gdbSP, 1);
+	  } 
+      }
+      
       if (cpu) {
-	  if (sd == start_sd) {
-	      if (cpu->tick_cb != NULL) {
-		  cpu->tick_cb(cpu->gdbSP, 1);
-	      } 
+	  sim_engine *engine = STATE_ENGINE(sd);
+	  engine->jmpbuf = &jmpbuf;
+	  jmpval = setjmp(jmpbuf);
+	  if (jmpval == sim_engine_halt_jmpval) {
+	      // Transfer data to original SD
+	      if (start_engine != engine) {
+		  start_engine->last_cpu = engine->last_cpu;
+		  start_engine->next_cpu = engine->next_cpu;
+		  start_engine->reason = engine->reason;
+		  start_engine->sigrc = engine->sigrc;
+		  engine->jmpbuf = NULL;
+	      }
+	      start_engine->jmpbuf = save_jmp;
+	      longjmp(*save_jmp, jmpval);
 	  }
 	  
 	  step_once (cpu);
-	  if (sim_events_tick (sd))
+	  if (sim_events_tick (sd)) {
 	      sim_events_process (sd);
+	  }
+      
+	  engine->jmpbuf = NULL;
       }
       
       //      if (strcmp(get_inferior_args(),"all") == 0) {
-	  sd = sd->sim_state_next;
-	  if (sd == NULL) {
-	      sd = sim_state_head;
-	  }
-	  //      }
+      sd = sd->sim_state_next;
+      if (sd == NULL) {
+	  sd = sim_state_head;
+      }
+      //      }
+      cpu = STATE_CPU (sd, 0);
 
   }
+
+  // Some SD hit a jmpbuf
   
 }
 
@@ -232,13 +260,13 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   sim_state_head = sd;
   
   /* Copy the systemC callback info out of the static variables */
-  cpu->gdbSP = gdbSP;
-  cpu->tick_cb = tick_cb;
-  cpu->read_reg_cb = read_reg_cb;
-  cpu->write_reg_cb = write_reg_cb;
+  sd->gdbSP = gdbSP;
+  sd->tick_cb = tick_cb;
+  sd->read_reg_cb = read_reg_cb;
+  sd->write_reg_cb = write_reg_cb;
 
   /* Tell systemc where to find us */
-  register_sd_cb(cpu->gdbSP, (void *) sd);
+  register_sd_cb(sd->gdbSP, (void *) sd);
   
   /* Set the PC.  */
   if (abfd != NULL)

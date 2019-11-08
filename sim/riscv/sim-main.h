@@ -72,16 +72,6 @@ struct _sim_cpu {
 #undef DECLARE_CSR
   } csr;
 
-  /* System C callback into */
-  void *gdbSP;
-  void (*register_sd_cb)(void *, void *);
-  void (*tick_cb)(void *, int);
-  unsigned long long (*read_reg_cb)(void *sp,
-				    unsigned long long addr);
-  void (*write_reg_cb)(void *sp, unsigned long long addr,
-		       unsigned long long val);
-
-
   sim_cpu_base base;
 };
 
@@ -93,12 +83,25 @@ struct atomic_mem_reserved_list {
 
 struct sim_state {
     struct sim_state *sim_state_next;
+
+    /* System C callback into */
+    void *gdbSP;
+    void (*register_sd_cb)(void *, void *);
+    void (*tick_cb)(void *, int);
+    unsigned long long (*read_reg_cb)(void *sp,
+				      unsigned long long addr);
+    void (*write_reg_cb)(void *sp, unsigned long long addr,
+			 unsigned long long val);
+
+
+
+
     sim_cpu *cpu[MAX_NR_PROCESSORS];
     
-  struct atomic_mem_reserved_list *amo_reserved_list;
+    struct atomic_mem_reserved_list *amo_reserved_list;
 
-  /* ... simulator specific members ... */
-  sim_state_base base;
+    /* ... simulator specific members ... */
+    sim_state_base base;
 
 };
 
