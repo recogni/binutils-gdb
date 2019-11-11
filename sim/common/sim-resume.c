@@ -30,30 +30,36 @@ has_stepped (SIM_DESC sd,
   sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_stopped, SIM_SIGTRAP);
 }
 
+struct sim_state *sim_state_curr = NULL;
 
 /* Generic resume - assumes the existance of sim_engine_run */
 
-void
+void *
 sim_resume (SIM_DESC sd,
 	    int step,
 	    int siggnal)
 {
-  sim_engine *engine = STATE_ENGINE (sd);
+  sim_engine *engine;
   jmp_buf buf;
   int jmpval;
 
-  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
-  /* we only want to be single stepping the simulator once */
-  if (engine->stepper != NULL)
-    {
-      sim_events_deschedule (sd, engine->stepper);
-      engine->stepper = NULL;
-    }
-  if (step)
-    engine->stepper = sim_events_schedule (sd, 1, has_stepped, sd);
+  // Resume them all
+  for (SIM_DESC _sd = sim_state_head; _sd != NULL; _sd = _sd->sim_state_next) {
+      ASSERT (STATE_MAGIC (_sd) == SIM_MAGIC_NUMBER);
+      engine = STATE_ENGINE (sd);
+      /* we only want to be single stepping the simulator once */
+      if (engine->stepper != NULL)
+	  {
+	      sim_events_deschedule (sd, engine->stepper);
+	      engine->stepper = NULL;
+	  }
+      if (step)
+	  engine->stepper = sim_events_schedule (sd, 1, has_stepped, sd);
 
-  sim_module_resume (sd);
+      sim_module_resume(_sd);
+  } 
+  //  sim_module_resume (sd);
 
   /* run/resume the simulator */
   engine->jmpbuf = &buf;
@@ -90,5 +96,11 @@ sim_resume (SIM_DESC sd,
     }
   engine->jmpbuf = NULL;
 
-  sim_module_suspend (sd);
+  // Suspend them all
+  for (SIM_DESC _sd = sim_state_head; _sd != NULL; _sd = _sd->sim_state_next) {
+      sim_module_suspend(_sd);
+  } 
+  //  sim_module_suspend (sd);
+
+  return (sim_state_cur->opaque_inf);
 }

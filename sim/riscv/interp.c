@@ -47,12 +47,14 @@ void (*write_reg_cb)(void *sp, unsigned long long addr,
 
 /* List of SDs */
 struct sim_state *sim_state_head = NULL;
+struct sim_state *sim_state_cur = NULL;
 
 
 /* This function is the main loop.  It should process ticks and decode+execute
    a single instruction.
 
    Usually you do not need to change things here.  */
+  int tick_cnt = 0;
 
 void
 sim_engine_run (SIM_DESC start_sd,
@@ -76,9 +78,11 @@ sim_engine_run (SIM_DESC start_sd,
       if (sd == start_sd) {
 	  if (sd->tick_cb != NULL) {
 	      sd->tick_cb(sd->gdbSP, 1);
+	      tick_cnt++;
 	  } 
       }
-      
+
+      sim_state_cur = sd;
       if (cpu) {
 	  sim_engine *engine = STATE_ENGINE(sd);
 	  engine->jmpbuf = &jmpbuf;
@@ -248,7 +252,8 @@ riscv_get_symbol (SIM_DESC sd, const char *sym)
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
-		     char * const *argv, char * const *env)
+		     char * const *argv, char * const *env,
+		     void *opaque_inf)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   sim_cia addr;
@@ -264,6 +269,8 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   sd->tick_cb = tick_cb;
   sd->read_reg_cb = read_reg_cb;
   sd->write_reg_cb = write_reg_cb;
+
+  sd->opaque_inf = opaque_inf;
 
   /* Tell systemc where to find us */
   register_sd_cb(sd->gdbSP, (void *) sd);

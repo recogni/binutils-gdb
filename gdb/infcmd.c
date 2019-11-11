@@ -697,7 +697,7 @@ start_command (const char *args, int from_tty)
 /* Start the execution of the program stopping at the first
    instruction.  */
 
-static void
+void
 starti_command (const char *args, int from_tty)
 {
   run_command_1 (args, from_tty, RUN_STOP_AT_FIRST_INSN);

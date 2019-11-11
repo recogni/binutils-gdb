@@ -574,7 +574,7 @@ kill_inferior_command (const char *args, int from_tty)
   bfd_cache_close_all ();
 }
 
-static void
+void
 inferior_command (const char *args, int from_tty)
 {
   struct inferior *inf;
@@ -689,11 +689,17 @@ void
 add_inferior_exec (const char *exec)
 {
 
-  scoped_restore_current_pspace_and_thread restore_pspace_thread;
+   scoped_restore_current_pspace_and_thread restore_pspace_thread;
   
   struct inferior *inf = add_inferior_with_spaces ();
 
   printf_filtered (_("Added inferior %d\n"), inf->num);
+      set_current_inferior (inf);
+      switch_to_no_thread ();
+      set_current_program_space (inf->pspace);
+
+      gdb::observers::user_selected_context_changed.notify
+	(USER_SELECTED_INFERIOR);
 
   /* Switch over temporarily, while reading executable and
      symbols.q.  */

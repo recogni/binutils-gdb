@@ -163,7 +163,8 @@ SIM_RC sim_load (SIM_DESC sd, const char *prog, struct bfd *abfd, int from_tty);
    counter and stack pointer set accordingly. */
 
 SIM_RC sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
-			    char * const *argv, char * const *env);
+			    char * const *argv, char * const *env,
+			    void *opaque_inf);
 
 
 /* Fetch LENGTH bytes of the simulated program's memory.  Start fetch
@@ -235,7 +236,7 @@ void sim_info (SIM_DESC sd, int verbose);
    continued.  A zero SIGRC value indicates that the program should
    continue as normal. */
 
-void sim_resume (SIM_DESC sd, int step, int siggnal);
+void *sim_resume (SIM_DESC sd, int step, int siggnal);
 
 
 /* Asynchronous request to stop the simulation.

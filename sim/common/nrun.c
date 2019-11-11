@@ -135,9 +135,9 @@ main (int argc, char **argv)
 
   /* Prepare the program for execution.  */
 #ifdef HAVE_ENVIRON
-  sim_create_inferior (sd, prog_bfd, prog_argv, environ);
+  sim_create_inferior (sd, prog_bfd, prog_argv, environ, NULL);
 #else
-  sim_create_inferior (sd, prog_bfd, prog_argv, NULL);
+  sim_create_inferior (sd, prog_bfd, prog_argv, NULL, NULL);
 #endif
 
   /* To accommodate relative file paths, chdir to sysroot now.  We

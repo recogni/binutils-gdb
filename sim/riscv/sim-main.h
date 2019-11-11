@@ -94,7 +94,7 @@ struct sim_state {
 			 unsigned long long val);
 
 
-
+    void *opaque_inf;
 
     sim_cpu *cpu[MAX_NR_PROCESSORS];
     
@@ -105,6 +105,8 @@ struct sim_state {
 
 };
 
+extern struct sim_state *sim_state_head;
+extern struct sim_state *sim_state_cur;
 extern void step_once (SIM_CPU *);
 extern void initialize_cpu (SIM_DESC, SIM_CPU *, int);
 extern void initialize_env (SIM_DESC, const char * const *argv,

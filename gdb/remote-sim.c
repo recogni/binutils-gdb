@@ -657,7 +657,8 @@ gdbsim_target::create_inferior (const char *exec_file,
     }
 
   if (sim_create_inferior (sim_data->gdbsim_desc, exec_bfd,
-			   built_argv.get (), env)
+			   built_argv.get (), env,
+			   (void *) current_inferior ())
       != SIM_RC_OK)
     error (_("Unable to create sim inferior."));
 
@@ -967,6 +968,7 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
   static sighandler_t prev_sigint;
   int sigrc = 0;
   enum sim_stop reason = sim_running;
+  inferior *new_inf;
 
   /* This target isn't able to (yet) resume more than one inferior at a time.
      When ptid is minus_one_ptid, just use the current inferior.  If we're
@@ -998,8 +1000,14 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
 #else
   prev_sigint = signal (SIGINT, gdbsim_cntrl_c);
 #endif
-  sim_resume (sim_data->gdbsim_desc, sim_data->resume_step,
-	      sim_data->resume_siggnal);
+  new_inf = (inferior *) sim_resume (sim_data->gdbsim_desc,
+				     sim_data->resume_step,
+				     sim_data->resume_siggnal);
+  if ((new_inf != NULL) && (new_inf != current_inferior ())) {
+      set_current_inferior (new_inf);
+      sim_data = get_sim_inferior_data (new_inf,
+					SIM_INSTANCE_NEEDED);
+  } 
 
   signal (SIGINT, prev_sigint);
   sim_data->resume_step = 0;
@@ -1299,6 +1307,12 @@ gdbsim_target::has_memory ()
     return false;
 
   return true;
+}
+
+int
+gdbsim_target::can_use_hw_breakpoint (enum bptype arg0, int arg1, int arg2)
+{
+  return 1;
 }
 
 bool
