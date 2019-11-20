@@ -25,6 +25,7 @@
 #include "sim-basics.h"
 #include "machs.h"
 #include "sim-base.h"
+#include "sim-emulation.h"
 
 typedef union FRegisterValue
 {
@@ -65,6 +66,14 @@ struct _sim_cpu {
   };
   sim_cia pc;
   sim_cia endbrk;
+  int base_mhartid;
+
+  enum {
+    MODE_U = 0,
+    MODE_S,
+    MODE_H,
+    MODE_M
+  } mode;
 
   struct {
 #define DECLARE_CSR(name, num) unsigned_word name;
@@ -87,16 +96,15 @@ struct sim_state {
     /* System C callback into */
     void *gdbSP;
     void (*register_sd_cb)(void *, void *);
-    void (*tick_cb)(void *, int);
-    unsigned long long (*read_reg_cb)(void *sp,
-				      unsigned long long addr);
-    void (*write_reg_cb)(void *sp, unsigned long long addr,
-			 unsigned long long val);
-
+    sim_emulation_rupts_t (*tick_cb)(void *, int);
+    uint32_t (*read_reg_cb)(void *sp, uint32_t addr);
+    void (*write_reg_cb)(void *sp, uint32_t addr, uint32_t val);
 
     void *opaque_inf;
 
     sim_cpu *cpu[MAX_NR_PROCESSORS];
+
+    sim_emulation_rupt_t ext_rupt;
     
     struct atomic_mem_reserved_list *amo_reserved_list;
 

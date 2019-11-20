@@ -35,11 +35,10 @@ void sim_emulation_start_gdb(int argc, char **argv,
 			     char *progname2,
 			     void *gdbServiceProcessor,
 			     void (*register_sd)(void *sp, void *sd),
-			     void (*tick)(void *sp, int ticks),
-			     unsigned long long (*read_reg)(void *sp,
-							    unsigned long long addr),
-			     void (*write_reg)(void *sp, unsigned long long addr,
-					       unsigned long long val)
+			     sim_emulation_rupts_t (*tick)(void *sp, int ticks),
+			     uint32_t (*read_reg)(void *sp, uint32_t addr),
+			     void (*write_reg)(void *sp, uint32_t addr,
+					       uint32_t val)
 			     ) {
     prog_name1 = argv[1];	  // Save for later - GDB messes wtih args
     args.argc = argc;
@@ -61,11 +60,11 @@ void sim_emulation_start_gdb(int argc, char **argv,
 void sim_emulation_fini(void) {
 }
     
-int sim_emulation_mem_write(unsigned long long addr, unsigned long long *val, int size) {
+int sim_emulation_mem_write(uint32_t addr, uint32_t *val, int size) {
     return 1;
 }
 
-int sim_emulation_mem_read(unsigned long long addr, unsigned long long *val, int size) {
+int sim_emulation_mem_read(uint32_t addr, uint32_t *val, int size) {
     return 1;
 }
     

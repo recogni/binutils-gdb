@@ -127,6 +127,8 @@ struct gdbsim_target final
   bool has_all_memory ()  override;
   bool has_memory ()  override;
 
+  int can_use_hw_breakpoint (enum bptype arg0, int arg1, int arg2) override;
+
   bool can_async_p () override;
 
   bool is_async_p () override;
@@ -1312,7 +1314,7 @@ gdbsim_target::has_memory ()
 int
 gdbsim_target::can_use_hw_breakpoint (enum bptype arg0, int arg1, int arg2)
 {
-  return 1;
+  return 0;
 }
 
 bool

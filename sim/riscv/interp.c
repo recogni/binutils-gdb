@@ -39,11 +39,9 @@
 
 void *gdbSP = NULL;
 void (*register_sd_cb)(void *, void *) = NULL;
-void (*tick_cb)(void *, int) = NULL;
-unsigned long long (*read_reg_cb)(void *sp,
-				  unsigned long long addr) = NULL;
-void (*write_reg_cb)(void *sp, unsigned long long addr,
-		     unsigned long long val) = NULL;
+sim_emulation_rupts_t (*tick_cb)(void *, int) = NULL;
+uint32_t (*read_reg_cb)(void *sp, uint32_t addr) = NULL;
+void (*write_reg_cb)(void *sp, uint32_t addr, uint32_t val) = NULL;
 
 /* List of SDs */
 struct sim_state *sim_state_head = NULL;
@@ -77,8 +75,17 @@ sim_engine_run (SIM_DESC start_sd,
   while (1) {
       if (sd == start_sd) {
 	  if (sd->tick_cb != NULL) {
-	      sd->tick_cb(sd->gdbSP, 1);
+	      SIM_DESC rupt_sd = sim_state_head;
+	      sim_emulation_rupts_t rupts;
+	      rupts = sd->tick_cb(sd->gdbSP, 1);
 	      tick_cnt++;
+	      for (int i = 0; i < 4; i++) {
+		  rupt_sd->ext_rupt = rupts.proc[i];
+		  rupt_sd = rupt_sd->sim_state_next;
+		  if (rupt_sd == NULL) {
+		      break;
+		  } 
+	      } 
 	  } 
       }
 
@@ -99,7 +106,7 @@ sim_engine_run (SIM_DESC start_sd,
 	      start_engine->jmpbuf = save_jmp;
 	      longjmp(*save_jmp, jmpval);
 	  }
-	  
+
 	  step_once (cpu);
 	  if (sim_events_tick (sd)) {
 	      sim_events_process (sd);
@@ -150,6 +157,9 @@ alloc_mem (SIM_DESC sd)
   /* Data - 16K (???) */
   sim_core_attach(sd, NULL, 0, access_read_write, 0, 0x80000000, 0x10000,
 		  0, NULL, NULL);
+  /* External registers */
+  sim_core_attach(sd, NULL, 0, access_read_write, 0, 0x100, 0x10000,
+		  0, (struct hw*) 0xffffffff, NULL);
   return;
 }
 
@@ -260,9 +270,18 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   Elf_Internal_Phdr *phdr;
   int i, phnum;
 
-  /* Link them up */
-  sd->sim_state_next = sim_state_head;
-  sim_state_head = sd;
+  /* Link them up back to front */
+  sd->sim_state_next = NULL;
+  if (sim_state_head == NULL) {
+      sim_state_head = sd;
+  } else {
+      // Walk the chain to find the last
+      SIM_DESC esd;
+      for (esd = sim_state_head; esd->sim_state_next != NULL;
+	   esd = esd->sim_state_next) {
+      }
+      esd->sim_state_next = sd;
+  } 
   
   /* Copy the systemC callback info out of the static variables */
   sd->gdbSP = gdbSP;

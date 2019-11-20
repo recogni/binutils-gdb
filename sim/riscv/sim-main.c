@@ -1731,6 +1731,28 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       store_rd (cpu, rd, fetch_csr (cpu, "timeh", CSR_TIMEH, &cpu->csr.cycleh));
       break;
 
+    case MATCH_URET:
+      TRACE_INSN (cpu, "uret;");
+      pc = cpu->csr.uepc;
+      TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+      break;
+    case MATCH_SRET:
+      TRACE_INSN (cpu, "sret;");
+      pc = cpu->csr.sepc;
+      TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+      break;      
+    case MATCH_MRET:
+      TRACE_INSN (cpu, "mret;");
+      pc = cpu->csr.mepc;
+      TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
+      break;
+    case  MATCH_WFI:
+      TRACE_INSN(cpu, "wfi;");
+      // Check for interrupt or timer pending in MIP register
+      if ((cpu->csr.mip & ((1 << 11) | (1 << 7))) == 0) {
+	  pc = cpu->pc;      /* Repeat instruction */
+      } 
+      break;
     case MATCH_FENCE:
       TRACE_INSN (cpu, "fence;");
       break;
@@ -2196,67 +2218,6 @@ execute_one (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
   return cpu->pc + riscv_insn_length (iw);
 }
 
-/* Decode & execute a single instruction.  */
-void step_once (SIM_CPU *cpu)
-{
-  SIM_DESC sd = CPU_STATE (cpu);
-  unsigned_word iw;
-  unsigned int len;
-  sim_cia pc = cpu->pc;
-  const struct riscv_opcode *op;
-  int xlen = RISCV_XLEN (cpu);
-
-  if (TRACE_ANY_P (cpu))
-    trace_prefix (sd, cpu, NULL_CIA, pc, TRACE_LINENUM_P (cpu),
-		  NULL, 0, " "); /* Use a space for gcc warnings.  */
-
-  iw = sim_core_read_aligned_2 (cpu, pc, exec_map, pc);
-
-  len = riscv_insn_length (iw);
-
-  if (len == 4)
-    iw |= ((unsigned_word)sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2) << 16);
-
-  TRACE_CORE (cpu, "0x%08" PRIxTW, iw);
-
-  op = riscv_hash[OP_HASH_IDX (iw)];
-  if (!op)
-    sim_engine_halt (sd, cpu, NULL, pc, sim_signalled, SIM_SIGILL);
-
-  for (; op->name; op++)
-    {
-      /* Does the opcode match?  */
-      if (!(op->match_func) (op, iw))
-	continue;
-      /* Is this a pseudo-instruction?  */
-      if ((op->pinfo & INSN_ALIAS))
-	continue;
-      /* Is this instruction restricted to a certain value of XLEN?  */
-      if (op->xlen_requirement != 0 && op->xlen_requirement != xlen)
-	continue;
-      /* It's a match.  */
-      pc = execute_one (cpu, iw, op);
-      break;
-    }
-
-  /* TODO: Try to use a common counter and only update on demand (reads).  */
-  if (RISCV_XLEN (cpu) == 32)
-    {
-      unsigned_word old_cycle = cpu->csr.cycle++;
-
-      /* Increase cycleh if cycle is overflowed.  */
-      if (old_cycle > cpu->csr.cycle)
-	cpu->csr.cycleh++;
-    }
-  else
-    ++cpu->csr.cycle;
-
-  cpu->csr.instret = cpu->csr.cycle;
-  cpu->csr.instreth = cpu->csr.cycleh;
-
-  cpu->pc = pc;
-}
-
 /* Return the program counter for this cpu. */
 static sim_cia
 pc_get (sim_cpu *cpu)
@@ -2336,6 +2297,207 @@ reg_store (sim_cpu *cpu, int rn, unsigned char *buf, int len)
     }
 }
 
+static void
+cpu_reset(SIM_CPU *cpu)
+{
+  CPU_PC_FETCH (cpu) = pc_get;
+  CPU_PC_STORE (cpu) = pc_set;
+  CPU_REG_FETCH (cpu) = reg_fetch;
+  CPU_REG_STORE (cpu) = reg_store;
+
+  cpu->mode = MODE_M;
+
+  cpu->csr.mstatus = 0;
+  cpu->csr.mimpid = 0x8000;
+  cpu->csr.mhartid = cpu->base_mhartid;
+  cpu->csr.cycle = 0;
+  cpu->csr.cycleh = 0;
+  cpu->csr.instret = 0;
+  cpu->csr.instreth = 0;
+}
+ 
+static void
+interrupt_machine (SIM_CPU *cpu, long cause)
+{
+    // Set the MPP (previous mode)
+    cpu->csr.mstatus = (cpu->csr.mstatus & ~(3 << 11)) | (cpu->mode << 11);
+    // Set the MPIE
+    cpu->csr.mstatus = (cpu->csr.mstatus & ~(1 << 7)) |
+	(CSR_MSTATUS_MIE(cpu->csr.mstatus) >> 7);
+    cpu->csr.mcause = cause;
+    cpu->mode = MODE_M;
+    cpu->csr.mepc = cpu->pc;
+    if ((cpu->csr.mtvec & 0x3) == 0) {
+	// Direct
+	cpu->pc = cpu->csr.mtvec & 0xfffffff8;
+    } else {
+	// Don't support any other mode for now
+    }
+}
+    
+static void
+interrupt_super (SIM_CPU *cpu, long cause)
+{
+    // Set the MPP (previous mode)
+    cpu->csr.mstatus = (cpu->csr.mstatus & ~(1 << 8)) | ((cpu->mode & 1) << 8);
+    // Set the MPIE
+    cpu->csr.mstatus = (cpu->csr.mstatus & ~(1 << 5)) |
+	(CSR_MSTATUS_SIE(cpu->csr.mstatus) >> 5);
+    cpu->csr.scause = cause;
+    cpu->mode = MODE_S;
+    cpu->csr.sepc = cpu->pc;
+    if ((cpu->csr.stvec & 0x3) == 0) {
+	// Direct
+	cpu->pc = cpu->csr.stvec & 0xfffffff8;
+    } else {
+	// Don't support any other mode for now
+    }
+}
+    
+static void
+interrupt_user (SIM_CPU *cpu, long cause)
+{
+    // Set the MPP (previous mode) is a nop in user mode
+    // Set the MPIE
+    cpu->csr.mstatus = (cpu->csr.mstatus& ~(1 << 0)) |
+	(CSR_MSTATUS_UIE(cpu->csr.mstatus) >> 0);
+    cpu->csr.ucause = cause;
+    cpu->csr.uepc = cpu->pc;
+    if ((cpu->csr.utvec & 0x3) == 0) {
+	// Direct
+	cpu->pc = cpu->csr.stvec & 0xfffffff8;
+    } else {
+	// Don't support any other mode for now
+    }
+}
+    
+/* Decode & execute a single instruction.  */
+void
+step_once (SIM_CPU *cpu)
+{
+  SIM_DESC sd = CPU_STATE (cpu);
+  unsigned_word iw;
+  unsigned int len;
+  sim_cia pc = cpu->pc;
+  const struct riscv_opcode *op;
+  int xlen = RISCV_XLEN (cpu);
+
+  if (TRACE_ANY_P (cpu))
+    trace_prefix (sd, cpu, NULL_CIA, pc, TRACE_LINENUM_P (cpu),
+		  NULL, 0, " "); /* Use a space for gcc warnings.  */
+
+  if (sd->ext_rupt.reset) {
+      cpu_reset(cpu);
+      return;
+  }
+
+  if (sd->ext_rupt.halt) {
+      // We are in halt mode - nothing to do
+      return;
+  } 
+  
+  if (sd->ext_rupt.ext_rupt) {
+      /* Set external interrupt pending bit */
+      cpu->csr.mip |= 1 << 11;
+  }
+
+  if (sd->ext_rupt.timer_rupt) {
+      /* Set (external but arch specified) timer pending bit */
+      cpu->csr.mip |= 1 << 7;
+  }
+
+  if (CSR_MSTATUS_MIE(cpu->csr.mstatus) &&
+      (CSR_MIP_MEI & cpu->csr.mie & cpu->csr.mip)) {
+      // Machine mode external interrupt pending and enabled
+      interrupt_machine(cpu, CAUSE_M_EXT);
+  } else if (CSR_MSTATUS_MIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_MSI & cpu->csr.mie & cpu->csr.mip)) {
+      // Machine mode software interrupt pending and enabled
+      interrupt_machine(cpu, CAUSE_M_SOFT);
+  } else if (CSR_MSTATUS_MIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_MTI & cpu->csr.mie & cpu->csr.mip)) {
+      // Machine mode timer interrupt pending and enabled
+      interrupt_machine(cpu, CAUSE_M_TIME);
+  } else if (CSR_MSTATUS_SIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_SEI & cpu->csr.mie & cpu->csr.mip) &&
+	     ((cpu->mode == MODE_S) | (cpu->mode == MODE_U))) {	
+      // Super mode external interrupt pending and enabled
+      interrupt_super(cpu, CAUSE_S_EXT);
+  } else if (CSR_MSTATUS_SIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_SSI & cpu->csr.mie & cpu->csr.mip) &&
+	     ((cpu->mode == MODE_S) | (cpu->mode == MODE_U))) {
+      // Super mode software interrupt pending and enabled
+      interrupt_super(cpu, CAUSE_S_SOFT);
+  } else if (CSR_MSTATUS_SIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_STI & cpu->csr.mie & cpu->csr.mip) &&
+	     ((cpu->mode == MODE_S) | (cpu->mode == MODE_U))) {
+      // Super mode timer interrupt pending and enabled
+      interrupt_super(cpu, CAUSE_S_TIME);
+  } else if (CSR_MSTATUS_UIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_UEI & cpu->csr.mie & cpu->csr.mip) &&
+	     (cpu->mode == MODE_U)) {
+      // User mode external interrupt pending and enabled
+      interrupt_user(cpu, CAUSE_U_EXT);
+  } else if (CSR_MSTATUS_UIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_USI & cpu->csr.mie & cpu->csr.mip) &&
+	     (cpu->mode == MODE_U)) {
+      // USer mode software interrupt pending and enabled
+      interrupt_user(cpu, CAUSE_U_SOFT);
+  } else if (CSR_MSTATUS_UIE(cpu->csr.mstatus) &&
+	     (CSR_MIP_UTI & cpu->csr.mie & cpu->csr.mip) &&
+	     (cpu->mode == MODE_U)) {
+      // User mode timer interrupt pending and enabled
+      interrupt_user(cpu, CAUSE_U_TIME);      
+  }
+  
+
+  iw = sim_core_read_aligned_2 (cpu, pc, exec_map, pc);
+
+  len = riscv_insn_length (iw);
+
+  if (len == 4)
+    iw |= ((unsigned_word)sim_core_read_aligned_2 (cpu, pc, exec_map, pc + 2) << 16);
+
+  TRACE_CORE (cpu, "0x%08" PRIxTW, iw);
+
+  op = riscv_hash[OP_HASH_IDX (iw)];
+  if (!op)
+    sim_engine_halt (sd, cpu, NULL, pc, sim_signalled, SIM_SIGILL);
+
+  for (; op->name; op++)
+    {
+      /* Does the opcode match?  */
+      if (!(op->match_func) (op, iw))
+	continue;
+      /* Is this a pseudo-instruction?  */
+      if ((op->pinfo & INSN_ALIAS))
+	continue;
+      /* Is this instruction restricted to a certain value of XLEN?  */
+      if (op->xlen_requirement != 0 && op->xlen_requirement != xlen)
+	continue;
+      /* It's a match.  */
+      pc = execute_one (cpu, iw, op);
+      break;
+    }
+
+  /* TODO: Try to use a common counter and only update on demand (reads).  */
+  if (RISCV_XLEN (cpu) == 32)
+    {
+      unsigned_word old_cycle = cpu->csr.cycle++;
+
+      /* Increase cycleh if cycle is overflowed.  */
+      if (old_cycle > cpu->csr.cycle)
+	cpu->csr.cycleh++;
+    }
+  else
+    ++cpu->csr.cycle;
+
+  cpu->csr.instret = cpu->csr.cycle;
+  cpu->csr.instreth = cpu->csr.cycleh;
+
+  cpu->pc = pc;
+}
+
 /* Initialize the state for a single cpu.  Usuaully this involves clearing all
    registers back to their reset state.  Should also hook up the fetch/store
    helper functions too.  */
@@ -2345,11 +2507,6 @@ void initialize_cpu (SIM_DESC sd, SIM_CPU *cpu, int mhartid)
   int i;
 
   memset (cpu->regs, 0, sizeof (cpu->regs));
-
-  CPU_PC_FETCH (cpu) = pc_get;
-  CPU_PC_STORE (cpu) = pc_set;
-  CPU_REG_FETCH (cpu) = reg_fetch;
-  CPU_REG_STORE (cpu) = reg_store;
 
   if (!riscv_hash[0])
     {
@@ -2382,13 +2539,10 @@ void initialize_cpu (SIM_DESC sd, SIM_CPU *cpu, int mhartid)
 	}
     }
 
-  cpu->csr.mimpid = 0x8000;
-  cpu->csr.mhartid = mhartid;
-  cpu->csr.cycle = 0;
-  cpu->csr.cycleh = 0;
-  cpu->csr.instret = 0;
-  cpu->csr.instreth = 0;
+  cpu->base_mhartid = mhartid;
+  cpu_reset(cpu);
 }
+
 
 /* Some utils don't like having a NULL environ.  */
 static const char * const simple_env[] = { "HOME=/", "PATH=/bin", NULL };

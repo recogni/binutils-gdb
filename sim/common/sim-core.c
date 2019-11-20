@@ -471,6 +471,14 @@ sim_core_read_buffer (SIM_DESC sd,
 			    0 /*dont-abort*/, NULL, NULL_CIA);
     if (mapping == NULL)
       break;
+
+    if (mapping->buffer == NULL) {
+	/* No buffer means external bus */
+	((unsigned_4*)buffer)[count] =
+	    (unsigned_4) sd->read_reg_cb(sd->gdbSP, raddr - mapping->base);
+	count += 4;
+	continue;
+    } 
 #if (WITH_HW)
     if (mapping->device != NULL)
       {
@@ -529,6 +537,13 @@ sim_core_write_buffer (SIM_DESC sd,
 			       0 /*dont-abort*/, NULL, NULL_CIA);
       if (mapping == NULL)
 	break;
+    if (mapping->buffer == NULL) {
+	/* No buffer means external bus */
+	sd->write_reg_cb(sd->gdbSP, raddr - mapping->base,
+			 ((unsigned_4*)buffer)[count]);
+	count += 4;
+	continue;
+    } 
 #if (WITH_HW)
       if (mapping->device != NULL)
 	{

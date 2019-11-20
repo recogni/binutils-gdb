@@ -829,6 +829,16 @@
 #define CAUSE_SUPERVISOR_ECALL 0x9
 #define CAUSE_HYPERVISOR_ECALL 0xa
 #define CAUSE_MACHINE_ECALL 0xb
+#define CAUSE_U_SOFT 0x10000000
+#define CAUSE_S_SOFT 0x10000001
+#define CAUSE_M_SOFT 0x10000003
+#define CAUSE_U_TIME 0x10000004
+#define CAUSE_S_TIME 0x10000005
+#define CAUSE_M_TIME 0x10000007
+#define CAUSE_U_EXT 0x10000008
+#define CAUSE_S_EXT 0x10000009
+#define CAUSE_M_EXT 0x1000000B
+
 #endif
 #ifdef DECLARE_INSN
 DECLARE_INSN(slli_rv32, MATCH_SLLI_RV32, MASK_SLLI_RV32)
@@ -1208,6 +1218,14 @@ DECLARE_CSR(marchid, CSR_MARCHID)
 DECLARE_CSR(mimpid, CSR_MIMPID)
 DECLARE_CSR(mhartid, CSR_MHARTID)
 DECLARE_CSR(mstatus, CSR_MSTATUS)
+#define CSR_MSTATUS_UIE(val) (((val) >> 0) & 1)
+#define CSR_MSTATUS_SIE(val) (((val) >> 1) & 1)
+#define CSR_MSTATUS_MIE(val) (((val) >> 3) & 1)
+#define CSR_MSTATUS_UPIE(val) (((val) >> 4) & 1)
+#define CSR_MSTATUS_SPIE(val) (((val) >> 5) & 1)
+#define CSR_MSTATUS_MPIE(val) (((val) >> 7) & 1)
+#define CSR_MSTATUS_SPP(val) (((val) >> 8) & 1)
+#define CSR_MSTATUS_MPP(val) (((val) >> 11) & 3)
 DECLARE_CSR(misa, CSR_MISA)
 DECLARE_CSR(medeleg, CSR_MEDELEG)
 DECLARE_CSR(mideleg, CSR_MIDELEG)
@@ -1219,6 +1237,18 @@ DECLARE_CSR(mepc, CSR_MEPC)
 DECLARE_CSR(mcause, CSR_MCAUSE)
 DECLARE_CSR(mtval, CSR_MTVAL)
 DECLARE_CSR(mip, CSR_MIP)
+#define CSR_MIP_MEI (1 << 11)
+#define CSR_MIP_SEI (1 << 9)
+#define CSR_MIP_UEI (1 << 8)
+#define CSR_MIP_MTI (1 << 7)
+#define CSR_MIP_STI (1 << 5)
+#define CSR_MIP_UTI (1 << 4)
+#define CSR_MIP_MSI (1 << 3)
+#define CSR_MIP_SSI (1 << 1)
+#define CSR_MIP_USI (1 << 0)
+#define CSR_MIP_M_MASK (CSR_MIP_MEI | CSR_MIP_MTI | CSR_MIP_MSI)
+#define CSR_MIP_S_MASK (CSR_MIP_SEI | CSR_MIP_STI | CSR_MIP_SSI)
+#define CSR_MIP_U_MASK (CSR_MIP_UEI | CSR_MIP_UTI | CSR_MIP_USI)
 DECLARE_CSR(pmpcfg0, CSR_PMPCFG0)
 DECLARE_CSR(pmpcfg1, CSR_PMPCFG1)
 DECLARE_CSR(pmpcfg2, CSR_PMPCFG2)
@@ -1381,4 +1411,13 @@ DECLARE_CAUSE("user_ecall", CAUSE_USER_ECALL)
 DECLARE_CAUSE("supervisor_ecall", CAUSE_SUPERVISOR_ECALL)
 DECLARE_CAUSE("hypervisor_ecall", CAUSE_HYPERVISOR_ECALL)
 DECLARE_CAUSE("machine_ecall", CAUSE_MACHINE_ECALL)
+DECLARE_CAUSE("user software", CAUSE_U_SOFT)
+DECLARE_CAUSE("supervisor software", CAUSE_S_SOFT)
+DECLARE_CAUSE("machine software", CAUSE_M_SOFT)
+DECLARE_CAUSE("user timer", CAUSE_U_TIME)
+DECLARE_CAUSE("supervisor timer", CAUSE_S_TIME)
+DECLARE_CAUSE("machine timer", CAUSE_M_TIME)
+DECLARE_CAUSE("user external", CAUSE_U_EXT)
+DECLARE_CAUSE("supervisor external", CAUSE_S_EXT)
+DECLARE_CAUSE("machine external", CAUSE_M_EXT)
 #endif

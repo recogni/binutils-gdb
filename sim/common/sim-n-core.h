@@ -164,6 +164,14 @@ sim_core_read_aligned_N(sim_cpu *cpu,
   mapping = sim_core_find_mapping (core, map, addr, N, read_transfer, 1 /*abort*/, cpu, cia);
   do
     {
+#if (M == 4)
+	if (mapping->buffer == NULL) {
+	    /* No buffer means external bus */
+	    SIM_DESC sd = CPU_STATE(cpu);
+	    val = sd->read_reg_cb(sd->gdbSP, addr - mapping->base);
+	    break;
+	}
+#endif	    
 #if (WITH_HW)
       if (mapping->device != NULL)
 	{
@@ -284,6 +292,14 @@ sim_core_write_aligned_N(sim_cpu *cpu,
   mapping = sim_core_find_mapping (core, map, addr, N, write_transfer, 1 /*abort*/, cpu, cia);
   do
     {
+#if (M == 4)
+	if (mapping->buffer == NULL) {
+	    /* No buffer means external bus */
+	    SIM_DESC sd = CPU_STATE(cpu);
+	    sd->write_reg_cb(sd->gdbSP, addr - mapping->base, H2T_M(val));
+	    break;
+	}
+#endif	    
 #if (WITH_HW)
       if (mapping->device != NULL)
 	{
