@@ -133,10 +133,11 @@ store_csr (SIM_CPU *cpu, const char *name, int csr, unsigned_word *reg,
     case CSR_INSTRETH:
     case CSR_TIMEH:
       RISCV_ASSERT_RV32 (cpu, "CSR: %s", name);
+      *reg = val;
 
-    /* All the rest are immutable.  */
+    /* Just stuff the rest  */
     default:
-      val = *reg;
+      *reg = val;
       break;
     }
 
@@ -478,6 +479,7 @@ execute_f (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
   unsigned int mask_arithmetic = MASK_FADD_S;
   unsigned int mask_mul_add = MASK_FMADD_S;
   unsigned int mask_convert = MASK_FCVT_S_W;
+  unsigned_word swap;
 
   static const int round_modes[] =
   {
@@ -768,8 +770,9 @@ execute_f (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
     case MATCH_FSCSR:
       TRACE_INSN (cpu, "fscsr %s, %sf",
 		  rd_name, rs1_name);
-      store_rd (cpu, rd, fetch_csr (cpu, "fcsr", CSR_FCSR, &cpu->csr.fcsr));
+      swap = fetch_csr (cpu, "fcsr", CSR_FCSR, &cpu->csr.fcsr);
       store_csr (cpu, "fcsr", CSR_FCSR, &cpu->csr.fcsr, cpu->regs[rs1]);
+      store_rd (cpu, rd, swap);
       break;
     case MATCH_FRRM:
       TRACE_INSN (cpu, "frrm %s",
@@ -779,8 +782,9 @@ execute_f (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
     case MATCH_FSRM:
       TRACE_INSN (cpu, "fsrm %s, %s",
 		  rd_name, rs1_name);
-      store_rd (cpu, rd, fetch_csr (cpu, "frm", CSR_FCSR, &cpu->csr.frm));
+      swap = fetch_csr (cpu, "frm", CSR_FCSR, &cpu->csr.frm);
       store_csr (cpu, "frm", CSR_FCSR, &cpu->csr.frm, cpu->regs[rs1]);
+      store_rd (cpu, rd, swap);
       break;
     case MATCH_FRFLAGS:
       TRACE_INSN (cpu, "frflags %s",
@@ -790,8 +794,9 @@ execute_f (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
     case MATCH_FSFLAGS:
       TRACE_INSN (cpu, "fsflags %s, %s",
 		  rd_name, frs1_name);
-      store_rd (cpu, rd, fetch_csr (cpu, "fflags", CSR_FFLAGS, &cpu->csr.fflags));
+      swap = fetch_csr (cpu, "fflags", CSR_FFLAGS, &cpu->csr.fflags);
       store_csr (cpu, "fflags", CSR_FFLAGS, &cpu->csr.fflags, cpu->regs[rs1]);
+      store_rd (cpu, rd, swap);
       break;
     default:
       TRACE_INSN (cpu, "UNHANDLED INSN: %s", op->name);
@@ -1289,6 +1294,7 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
   unsigned_word shamt_imm = ((iw >> OP_SH_SHAMT) & OP_MASK_SHAMT);
   unsigned_word tmp;
   sim_cia pc = cpu->pc + 4;
+  unsigned_word swap;
 
   TRACE_EXTRACT (cpu, "rd:%-2i:%-4s  rs1:%-2i:%-4s %0*"PRIxTW"  rs2:%-2i:%-4s %0*"PRIxTW"  match:%#x mask:%#x",
 		 rd, rd_name,
@@ -1626,9 +1632,10 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	{
 #define DECLARE_CSR(name, num) \
 	case num: \
-	  store_rd (cpu, rd, fetch_csr (cpu, #name, num, &cpu->csr.name)); \
+	  swap = fetch_csr (cpu, #name, num, &cpu->csr.name); \
 	  store_csr (cpu, #name, num, &cpu->csr.name, \
 		     cpu->csr.name & !cpu->regs[rs1]); \
+	  store_rd (cpu, rd, swap); \
 	  break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -1640,9 +1647,10 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	{
 #define DECLARE_CSR(name, num) \
 	case num: \
-	  store_rd (cpu, rd, fetch_csr (cpu, #name, num, &cpu->csr.name)); \
+	  swap = fetch_csr (cpu, #name, num, &cpu->csr.name); \
 	  store_csr (cpu, #name, num, &cpu->csr.name, \
 		     cpu->csr.name & !rs1); \
+	  store_rd (cpu, rd, swap); \
 	  break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -1654,9 +1662,10 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	{
 #define DECLARE_CSR(name, num) \
 	case num: \
-	  store_rd (cpu, rd, fetch_csr (cpu, #name, num, &cpu->csr.name)); \
+	  swap = fetch_csr (cpu, #name, num, &cpu->csr.name); \
 	  store_csr (cpu, #name, num, &cpu->csr.name, \
 		     cpu->csr.name | cpu->regs[rs1]); \
+	  store_rd (cpu, rd, swap); \
 	  break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -1668,9 +1677,10 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	{
 #define DECLARE_CSR(name, num) \
 	case num: \
-	  store_rd (cpu, rd, fetch_csr (cpu, #name, num, &cpu->csr.name)); \
+	  swap = fetch_csr (cpu, #name, num, &cpu->csr.name); \
 	  store_csr (cpu, #name, num, &cpu->csr.name, \
 		     cpu->csr.name | rs1); \
+	  store_rd (cpu, rd, swap); \
 	  break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -1682,8 +1692,9 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	{
 #define DECLARE_CSR(name, num) \
 	case num: \
-	  store_rd (cpu, rd, fetch_csr (cpu, #name, num, &cpu->csr.name)); \
+	  swap = fetch_csr (cpu, #name, num, &cpu->csr.name); \
 	  store_csr (cpu, #name, num, &cpu->csr.name, cpu->regs[rs1]); \
+	  store_rd (cpu, rd, swap); \
 	  break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -1695,8 +1706,9 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	{
 #define DECLARE_CSR(name, num) \
 	case num: \
-	  store_rd (cpu, rd, fetch_csr (cpu, #name, num, &cpu->csr.name)); \
+	  swap = fetch_csr (cpu, #name, num, &cpu->csr.name); \
 	  store_csr (cpu, #name, num, &cpu->csr.name, rs1); \
+	  store_rd (cpu, rd, swap); \
 	  break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -2316,7 +2328,7 @@ cpu_reset(SIM_CPU *cpu)
   cpu->csr.instreth = 0;
 }
  
-static void
+static unsigned_word
 interrupt_machine (SIM_CPU *cpu, long cause)
 {
     // Set the MPP (previous mode)
@@ -2324,50 +2336,59 @@ interrupt_machine (SIM_CPU *cpu, long cause)
     // Set the MPIE
     cpu->csr.mstatus = (cpu->csr.mstatus & ~(1 << 7)) |
 	(CSR_MSTATUS_MIE(cpu->csr.mstatus) >> 7);
+    // Clear the MIE
+    cpu->csr.mstatus &= ~(1 << 3);
     cpu->csr.mcause = cause;
     cpu->mode = MODE_M;
     cpu->csr.mepc = cpu->pc;
     if ((cpu->csr.mtvec & 0x3) == 0) {
 	// Direct
-	cpu->pc = cpu->csr.mtvec & 0xfffffff8;
+	return (cpu->csr.mtvec & 0xfffffff8);
     } else {
 	// Don't support any other mode for now
+	return (cpu->pc);
     }
 }
     
-static void
+static unsigned_word
 interrupt_super (SIM_CPU *cpu, long cause)
 {
-    // Set the MPP (previous mode)
+    // Set the SPP (previous mode)
     cpu->csr.mstatus = (cpu->csr.mstatus & ~(1 << 8)) | ((cpu->mode & 1) << 8);
-    // Set the MPIE
+    // Set the SPIE
     cpu->csr.mstatus = (cpu->csr.mstatus & ~(1 << 5)) |
 	(CSR_MSTATUS_SIE(cpu->csr.mstatus) >> 5);
+    // Clear the SIE
+    cpu->csr.mstatus &= ~(1 << 1);
     cpu->csr.scause = cause;
     cpu->mode = MODE_S;
     cpu->csr.sepc = cpu->pc;
     if ((cpu->csr.stvec & 0x3) == 0) {
 	// Direct
-	cpu->pc = cpu->csr.stvec & 0xfffffff8;
+	return (cpu->csr.stvec & 0xfffffff8);
     } else {
 	// Don't support any other mode for now
+	return (cpu->pc);
     }
 }
     
-static void
+static unsigned_word
 interrupt_user (SIM_CPU *cpu, long cause)
 {
-    // Set the MPP (previous mode) is a nop in user mode
-    // Set the MPIE
-    cpu->csr.mstatus = (cpu->csr.mstatus& ~(1 << 0)) |
+    // Set the UPP (previous mode) is a nop in user mode
+    // Set the UPIE
+    cpu->csr.mstatus = (cpu->csr.mstatus & ~(1 << 0)) |
 	(CSR_MSTATUS_UIE(cpu->csr.mstatus) >> 0);
+    // Clear the UIE
+    cpu->csr.mstatus &= ~(1 << 0);
     cpu->csr.ucause = cause;
     cpu->csr.uepc = cpu->pc;
     if ((cpu->csr.utvec & 0x3) == 0) {
 	// Direct
-	cpu->pc = cpu->csr.stvec & 0xfffffff8;
+	return (cpu->csr.stvec & 0xfffffff8);
     } else {
 	// Don't support any other mode for now
+	return (cpu->pc);
     }
 }
     
@@ -2409,45 +2430,45 @@ step_once (SIM_CPU *cpu)
   if (CSR_MSTATUS_MIE(cpu->csr.mstatus) &&
       (CSR_MIP_MEI & cpu->csr.mie & cpu->csr.mip)) {
       // Machine mode external interrupt pending and enabled
-      interrupt_machine(cpu, CAUSE_M_EXT);
+      cpu->pc = pc = interrupt_machine(cpu, CAUSE_M_EXT);
   } else if (CSR_MSTATUS_MIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_MSI & cpu->csr.mie & cpu->csr.mip)) {
       // Machine mode software interrupt pending and enabled
-      interrupt_machine(cpu, CAUSE_M_SOFT);
+      cpu->pc = pc = interrupt_machine(cpu, CAUSE_M_SOFT);
   } else if (CSR_MSTATUS_MIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_MTI & cpu->csr.mie & cpu->csr.mip)) {
       // Machine mode timer interrupt pending and enabled
-      interrupt_machine(cpu, CAUSE_M_TIME);
+      cpu->pc = pc = interrupt_machine(cpu, CAUSE_M_TIME);
   } else if (CSR_MSTATUS_SIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_SEI & cpu->csr.mie & cpu->csr.mip) &&
 	     ((cpu->mode == MODE_S) | (cpu->mode == MODE_U))) {	
       // Super mode external interrupt pending and enabled
-      interrupt_super(cpu, CAUSE_S_EXT);
+      cpu->pc = pc = interrupt_super(cpu, CAUSE_S_EXT);
   } else if (CSR_MSTATUS_SIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_SSI & cpu->csr.mie & cpu->csr.mip) &&
 	     ((cpu->mode == MODE_S) | (cpu->mode == MODE_U))) {
       // Super mode software interrupt pending and enabled
-      interrupt_super(cpu, CAUSE_S_SOFT);
+      cpu->pc = pc = interrupt_super(cpu, CAUSE_S_SOFT);
   } else if (CSR_MSTATUS_SIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_STI & cpu->csr.mie & cpu->csr.mip) &&
 	     ((cpu->mode == MODE_S) | (cpu->mode == MODE_U))) {
       // Super mode timer interrupt pending and enabled
-      interrupt_super(cpu, CAUSE_S_TIME);
+      cpu->pc = pc = interrupt_super(cpu, CAUSE_S_TIME);
   } else if (CSR_MSTATUS_UIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_UEI & cpu->csr.mie & cpu->csr.mip) &&
 	     (cpu->mode == MODE_U)) {
       // User mode external interrupt pending and enabled
-      interrupt_user(cpu, CAUSE_U_EXT);
+      cpu->pc = pc = interrupt_user(cpu, CAUSE_U_EXT);
   } else if (CSR_MSTATUS_UIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_USI & cpu->csr.mie & cpu->csr.mip) &&
 	     (cpu->mode == MODE_U)) {
       // USer mode software interrupt pending and enabled
-      interrupt_user(cpu, CAUSE_U_SOFT);
+      cpu->pc = pc = interrupt_user(cpu, CAUSE_U_SOFT);
   } else if (CSR_MSTATUS_UIE(cpu->csr.mstatus) &&
 	     (CSR_MIP_UTI & cpu->csr.mie & cpu->csr.mip) &&
 	     (cpu->mode == MODE_U)) {
       // User mode timer interrupt pending and enabled
-      interrupt_user(cpu, CAUSE_U_TIME);      
+      cpu->pc = pc = interrupt_user(cpu, CAUSE_U_TIME);      
   }
   
 
