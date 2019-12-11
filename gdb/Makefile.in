@@ -2454,7 +2454,7 @@ po/$(PACKAGE).pot: force
 # Makefile.in, but that was a pretty big annoyance.
 
 %.c: %.y
-	$(ECHO_YACC) $(SHELL) $(YLWRAP) $< $@.tab.c $@.tmp -- \
+	$(ECHO_YACC) $(SHELL) $(YLWRAP) $< y.tab.c $@.tmp -- \
 		$(YACC) $(YFLAGS) || (rm -f $@.tmp; false)
 	@sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
