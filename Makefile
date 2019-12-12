@@ -91,7 +91,7 @@ MAINTAINER_MODE_TRUE = #
 # -------------------------------------------------
 
 # The gcc driver likes to know the arguments it was configured with.
-TOPLEVEL_CONFIGURE_ARGUMENTS=./configure --target=riscv32 --enable-sim --disable-source-highlight
+TOPLEVEL_CONFIGURE_ARGUMENTS=./configure --target=riscv32 --enable-sim --disable-bootstrap --disable-source-highlight target_alias=riscv32 --with-python=/usr/bin/python3.6
 
 tooldir = ${exec_prefix}/riscv32
 build_tooldir = ${exec_prefix}/riscv32
@@ -109,7 +109,7 @@ GCC_SHLIB_SUBDIR =
 BUILD_SUBDIR = build-x86_64-pc-linux-gnu
 # This is set by the configure script to the arguments to use when configuring
 # directories built for the build system.
-BUILD_CONFIGARGS =  --cache-file=./config.cache '--enable-sim' '--disable-source-highlight' --program-transform-name='s&^&riscv32-&' --disable-option-checking --with-build-subdir="$(BUILD_SUBDIR)"
+BUILD_CONFIGARGS =  --cache-file=./config.cache '--enable-sim' '--disable-bootstrap' '--disable-source-highlight' '--with-python=/usr/bin/python3.6' --program-transform-name='s&^&riscv32-&' --disable-option-checking --with-build-subdir="$(BUILD_SUBDIR)"
 
 # Linker flags to use on the host, for stage1 or when not
 # bootstrapping.
@@ -171,7 +171,7 @@ SUBDIRS =  intl libiberty opcodes bfd readline zlib libdecnumber libctf binutils
 TARGET_CONFIGDIRS =  sim
 # This is set by the configure script to the arguments to use when configuring
 # directories built for the host system.
-HOST_CONFIGARGS =  --cache-file=./config.cache  --with-gnu-as --with-gnu-ld '--enable-sim' '--disable-source-highlight' --program-transform-name='s&^&riscv32-&' --disable-option-checking
+HOST_CONFIGARGS =  --cache-file=./config.cache  --with-gnu-as --with-gnu-ld '--enable-sim' '--disable-bootstrap' '--disable-source-highlight' '--with-python=/usr/bin/python3.6' --program-transform-name='s&^&riscv32-&' --disable-option-checking
 # Host programs are put under this directory, which is . except if building
 # with srcdir=..
 HOST_SUBDIR = .
@@ -243,7 +243,7 @@ POSTSTAGE1_HOST_EXPORTS = \
 TARGET_SUBDIR = riscv32
 # This is set by the configure script to the arguments to use when configuring
 # directories built for the target.
-TARGET_CONFIGARGS = --cache-file=./config.cache --enable-multilib --with-cross-host=x86_64-pc-linux-gnu   '--enable-sim' '--disable-source-highlight' --program-transform-name='s&^&riscv32-&' --disable-option-checking --with-target-subdir="$(TARGET_SUBDIR)"
+TARGET_CONFIGARGS = --cache-file=./config.cache --enable-multilib --with-cross-host=x86_64-pc-linux-gnu   '--enable-sim' '--disable-bootstrap' '--disable-source-highlight' '--with-python=/usr/bin/python3.6' --program-transform-name='s&^&riscv32-&' --disable-option-checking --with-target-subdir="$(TARGET_SUBDIR)"
 # This is the list of variables to export in the environment when
 # configuring subdirectories for the target system.
 BASE_TARGET_EXPORTS = \

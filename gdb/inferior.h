@@ -650,6 +650,7 @@ extern struct inferior *add_inferior_with_spaces (void);
 extern void print_selected_inferior (struct ui_out *uiout);
 
 // Added for sim-emulation
+extern void run_command (const char *args, int from_tty);
 extern void starti_command (const char *args, int from_tty);
 extern void inferior_command (const char *args, int from_tty);
 

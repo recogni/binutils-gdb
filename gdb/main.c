@@ -1188,6 +1188,8 @@ captured_main_1 (struct captured_main_args *context)
      read.  */
   init_history ();
 
+#ifdef RECOGNI_SYSTEMC
+  // Just return under systemC
   if (batch_flag)
     {
       int error_status = EXIT_FAILURE;
@@ -1196,6 +1198,7 @@ captured_main_1 (struct captured_main_args *context)
       /* We have hit the end of the batch file.  */
       quit_force (exit_arg, 0);
     }
+#endif  
 }
 
 #if 0

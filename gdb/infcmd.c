@@ -672,7 +672,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   finish_state.release ();
 }
 
-static void
+void
 run_command (const char *args, int from_tty)
 {
   run_command_1 (args, from_tty, RUN_NORMAL);

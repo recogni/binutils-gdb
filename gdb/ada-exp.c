@@ -153,7 +153,7 @@ static struct type *type_boolean (struct parser_state *);
 static struct type *type_system_address (struct parser_state *);
 
 
-#line 157 "ada-exp.tab.c"
+#line 157 "ada-exp.c.tmp"
 
 # ifndef YY_NULLPTRPTR
 #  if defined __cplusplus
@@ -245,6 +245,53 @@ extern int ada_debug;
     OTHERS = 303
   };
 #endif
+/* Tokens.  */
+#define INT 258
+#define NULL_PTR 259
+#define CHARLIT 260
+#define FLOAT 261
+#define TRUEKEYWORD 262
+#define FALSEKEYWORD 263
+#define COLONCOLON 264
+#define STRING 265
+#define NAME 266
+#define DOT_ID 267
+#define DOT_ALL 268
+#define DOLLAR_VARIABLE 269
+#define ASSIGN 270
+#define _AND_ 271
+#define OR 272
+#define XOR 273
+#define THEN 274
+#define ELSE 275
+#define NOTEQUAL 276
+#define LEQ 277
+#define GEQ 278
+#define IN 279
+#define DOTDOT 280
+#define UNARY 281
+#define MOD 282
+#define REM 283
+#define STARSTAR 284
+#define ABS 285
+#define NOT 286
+#define VAR 287
+#define ARROW 288
+#define TICK_ACCESS 289
+#define TICK_ADDRESS 290
+#define TICK_FIRST 291
+#define TICK_LAST 292
+#define TICK_LENGTH 293
+#define TICK_MAX 294
+#define TICK_MIN 295
+#define TICK_MODULUS 296
+#define TICK_POS 297
+#define TICK_RANGE 298
+#define TICK_SIZE 299
+#define TICK_TAG 300
+#define TICK_VAL 301
+#define NEW 302
+#define OTHERS 303
 
 /* Value type.  */
 #if ! defined ADA_STYPE && ! defined ADA_STYPE_IS_DECLARED
@@ -267,7 +314,7 @@ union ADA_STYPE
     struct internalvar *ivar;
   
 
-#line 271 "ada-exp.tab.c"
+#line 318 "ada-exp.c.tmp"
 
 };
 typedef union ADA_STYPE ADA_STYPE;
@@ -1631,26 +1678,26 @@ yyreduce:
   case 4:
 #line 189 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_COMMA); }
-#line 1636 "ada-exp.tab.c"
+#line 1683 "ada-exp.c.tmp"
     break;
 
   case 5:
 #line 191 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_ASSIGN); }
-#line 1642 "ada-exp.tab.c"
+#line 1689 "ada-exp.c.tmp"
     break;
 
   case 6:
 #line 196 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_IND); }
-#line 1648 "ada-exp.tab.c"
+#line 1695 "ada-exp.c.tmp"
     break;
 
   case 7:
 #line 200 "ada-exp.y"
     { write_exp_op_with_string (pstate, STRUCTOP_STRUCT,
 						    (yyvsp[0].sval)); }
-#line 1655 "ada-exp.tab.c"
+#line 1702 "ada-exp.c.tmp"
     break;
 
   case 8:
@@ -1660,7 +1707,7 @@ yyreduce:
 			  write_exp_elt_longcst (pstate, (yyvsp[-1].lval));
 			  write_exp_elt_opcode (pstate, OP_FUNCALL);
 		        }
-#line 1665 "ada-exp.tab.c"
+#line 1712 "ada-exp.c.tmp"
     break;
 
   case 9:
@@ -1681,13 +1728,13 @@ yyreduce:
 			      write_exp_elt_opcode (pstate, OP_FUNCALL);
 			    }
 			}
-#line 1686 "ada-exp.tab.c"
+#line 1733 "ada-exp.c.tmp"
     break;
 
   case 10:
 #line 229 "ada-exp.y"
     { type_qualifier = (yyvsp[-2].tval); }
-#line 1692 "ada-exp.tab.c"
+#line 1739 "ada-exp.c.tmp"
     break;
 
   case 11:
@@ -1700,19 +1747,19 @@ yyreduce:
 			  write_exp_elt_opcode (pstate, UNOP_QUAL);
 			  type_qualifier = (yyvsp[-4].tval);
 			}
-#line 1705 "ada-exp.tab.c"
+#line 1752 "ada-exp.c.tmp"
     break;
 
   case 12:
 #line 241 "ada-exp.y"
     { (yyval.tval) = type_qualifier; }
-#line 1711 "ada-exp.tab.c"
+#line 1758 "ada-exp.c.tmp"
     break;
 
   case 13:
 #line 246 "ada-exp.y"
     { write_exp_elt_opcode (pstate, TERNOP_SLICE); }
-#line 1717 "ada-exp.tab.c"
+#line 1764 "ada-exp.c.tmp"
     break;
 
   case 14:
@@ -1722,13 +1769,13 @@ yyreduce:
 			  else
 			    error (_("Cannot slice a type"));
 			}
-#line 1727 "ada-exp.tab.c"
+#line 1774 "ada-exp.c.tmp"
     break;
 
   case 15:
 #line 255 "ada-exp.y"
     { }
-#line 1733 "ada-exp.tab.c"
+#line 1780 "ada-exp.c.tmp"
     break;
 
   case 16:
@@ -1740,67 +1787,67 @@ yyreduce:
 			      write_exp_elt_opcode (pstate, OP_TYPE);
 			    }
 			}
-#line 1745 "ada-exp.tab.c"
+#line 1792 "ada-exp.c.tmp"
     break;
 
   case 17:
 #line 277 "ada-exp.y"
     { write_dollar_variable (pstate, (yyvsp[0].sval)); }
-#line 1751 "ada-exp.tab.c"
+#line 1798 "ada-exp.c.tmp"
     break;
 
   case 20:
 #line 287 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_NEG); }
-#line 1757 "ada-exp.tab.c"
+#line 1804 "ada-exp.c.tmp"
     break;
 
   case 21:
 #line 291 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_PLUS); }
-#line 1763 "ada-exp.tab.c"
+#line 1810 "ada-exp.c.tmp"
     break;
 
   case 22:
 #line 295 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT); }
-#line 1769 "ada-exp.tab.c"
+#line 1816 "ada-exp.c.tmp"
     break;
 
   case 23:
 #line 299 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_ABS); }
-#line 1775 "ada-exp.tab.c"
+#line 1822 "ada-exp.c.tmp"
     break;
 
   case 24:
 #line 302 "ada-exp.y"
     { (yyval.lval) = 0; }
-#line 1781 "ada-exp.tab.c"
+#line 1828 "ada-exp.c.tmp"
     break;
 
   case 25:
 #line 306 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 1787 "ada-exp.tab.c"
+#line 1834 "ada-exp.c.tmp"
     break;
 
   case 26:
 #line 308 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 1793 "ada-exp.tab.c"
+#line 1840 "ada-exp.c.tmp"
     break;
 
   case 27:
 #line 310 "ada-exp.y"
     { (yyval.lval) = (yyvsp[-2].lval) + 1; }
-#line 1799 "ada-exp.tab.c"
+#line 1846 "ada-exp.c.tmp"
     break;
 
   case 28:
 #line 312 "ada-exp.y"
     { (yyval.lval) = (yyvsp[-4].lval) + 1; }
-#line 1805 "ada-exp.tab.c"
+#line 1852 "ada-exp.c.tmp"
     break;
 
   case 29:
@@ -1812,85 +1859,85 @@ yyreduce:
 			  write_exp_elt_type (pstate, (yyvsp[-2].tval));
 			  write_exp_elt_opcode (pstate, UNOP_MEMVAL);
 			}
-#line 1817 "ada-exp.tab.c"
+#line 1864 "ada-exp.c.tmp"
     break;
 
   case 30:
 #line 329 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_EXP); }
-#line 1823 "ada-exp.tab.c"
+#line 1870 "ada-exp.c.tmp"
     break;
 
   case 31:
 #line 333 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_MUL); }
-#line 1829 "ada-exp.tab.c"
+#line 1876 "ada-exp.c.tmp"
     break;
 
   case 32:
 #line 337 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_DIV); }
-#line 1835 "ada-exp.tab.c"
+#line 1882 "ada-exp.c.tmp"
     break;
 
   case 33:
 #line 341 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_REM); }
-#line 1841 "ada-exp.tab.c"
+#line 1888 "ada-exp.c.tmp"
     break;
 
   case 34:
 #line 345 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_MOD); }
-#line 1847 "ada-exp.tab.c"
+#line 1894 "ada-exp.c.tmp"
     break;
 
   case 35:
 #line 349 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_REPEAT); }
-#line 1853 "ada-exp.tab.c"
+#line 1900 "ada-exp.c.tmp"
     break;
 
   case 36:
 #line 353 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_ADD); }
-#line 1859 "ada-exp.tab.c"
+#line 1906 "ada-exp.c.tmp"
     break;
 
   case 37:
 #line 357 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_CONCAT); }
-#line 1865 "ada-exp.tab.c"
+#line 1912 "ada-exp.c.tmp"
     break;
 
   case 38:
 #line 361 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_SUB); }
-#line 1871 "ada-exp.tab.c"
+#line 1918 "ada-exp.c.tmp"
     break;
 
   case 40:
 #line 368 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_EQUAL); }
-#line 1877 "ada-exp.tab.c"
+#line 1924 "ada-exp.c.tmp"
     break;
 
   case 41:
 #line 372 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
-#line 1883 "ada-exp.tab.c"
+#line 1930 "ada-exp.c.tmp"
     break;
 
   case 42:
 #line 376 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_LEQ); }
-#line 1889 "ada-exp.tab.c"
+#line 1936 "ada-exp.c.tmp"
     break;
 
   case 43:
 #line 380 "ada-exp.y"
     { write_exp_elt_opcode (pstate, TERNOP_IN_RANGE); }
-#line 1895 "ada-exp.tab.c"
+#line 1942 "ada-exp.c.tmp"
     break;
 
   case 44:
@@ -1899,7 +1946,7 @@ yyreduce:
 			  write_exp_elt_longcst (pstate, (LONGEST) (yyvsp[0].lval));
 			  write_exp_elt_opcode (pstate, BINOP_IN_BOUNDS);
 			}
-#line 1904 "ada-exp.tab.c"
+#line 1951 "ada-exp.c.tmp"
     break;
 
   case 45:
@@ -1911,7 +1958,7 @@ yyreduce:
 		          write_exp_elt_type (pstate, (yyvsp[0].tval));
 		          write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
 			}
-#line 1916 "ada-exp.tab.c"
+#line 1963 "ada-exp.c.tmp"
     break;
 
   case 46:
@@ -1919,7 +1966,7 @@ yyreduce:
     { write_exp_elt_opcode (pstate, TERNOP_IN_RANGE);
 		          write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
 			}
-#line 1924 "ada-exp.tab.c"
+#line 1971 "ada-exp.c.tmp"
     break;
 
   case 47:
@@ -1929,7 +1976,7 @@ yyreduce:
 			  write_exp_elt_opcode (pstate, BINOP_IN_BOUNDS);
 		          write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
 			}
-#line 1934 "ada-exp.tab.c"
+#line 1981 "ada-exp.c.tmp"
     break;
 
   case 48:
@@ -1942,91 +1989,91 @@ yyreduce:
 		          write_exp_elt_opcode (pstate, UNOP_IN_RANGE);
 		          write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT);
 			}
-#line 1947 "ada-exp.tab.c"
+#line 1994 "ada-exp.c.tmp"
     break;
 
   case 49:
 #line 416 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_GEQ); }
-#line 1953 "ada-exp.tab.c"
+#line 2000 "ada-exp.c.tmp"
     break;
 
   case 50:
 #line 420 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_LESS); }
-#line 1959 "ada-exp.tab.c"
+#line 2006 "ada-exp.c.tmp"
     break;
 
   case 51:
 #line 424 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_GTR); }
-#line 1965 "ada-exp.tab.c"
+#line 2012 "ada-exp.c.tmp"
     break;
 
   case 58:
 #line 437 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_BITWISE_AND); }
-#line 1971 "ada-exp.tab.c"
+#line 2018 "ada-exp.c.tmp"
     break;
 
   case 59:
 #line 439 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_BITWISE_AND); }
-#line 1977 "ada-exp.tab.c"
+#line 2024 "ada-exp.c.tmp"
     break;
 
   case 60:
 #line 444 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_LOGICAL_AND); }
-#line 1983 "ada-exp.tab.c"
+#line 2030 "ada-exp.c.tmp"
     break;
 
   case 61:
 #line 446 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_LOGICAL_AND); }
-#line 1989 "ada-exp.tab.c"
+#line 2036 "ada-exp.c.tmp"
     break;
 
   case 62:
 #line 451 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_BITWISE_IOR); }
-#line 1995 "ada-exp.tab.c"
+#line 2042 "ada-exp.c.tmp"
     break;
 
   case 63:
 #line 453 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_BITWISE_IOR); }
-#line 2001 "ada-exp.tab.c"
+#line 2048 "ada-exp.c.tmp"
     break;
 
   case 64:
 #line 458 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_LOGICAL_OR); }
-#line 2007 "ada-exp.tab.c"
+#line 2054 "ada-exp.c.tmp"
     break;
 
   case 65:
 #line 460 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_LOGICAL_OR); }
-#line 2013 "ada-exp.tab.c"
+#line 2060 "ada-exp.c.tmp"
     break;
 
   case 66:
 #line 464 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_BITWISE_XOR); }
-#line 2019 "ada-exp.tab.c"
+#line 2066 "ada-exp.c.tmp"
     break;
 
   case 67:
 #line 466 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_BITWISE_XOR); }
-#line 2025 "ada-exp.tab.c"
+#line 2072 "ada-exp.c.tmp"
     break;
 
   case 68:
 #line 478 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_ADDR); }
-#line 2031 "ada-exp.tab.c"
+#line 2078 "ada-exp.c.tmp"
     break;
 
   case 69:
@@ -2037,82 +2084,82 @@ yyreduce:
 					      type_system_address (pstate));
 			  write_exp_elt_opcode (pstate, UNOP_CAST);
 			}
-#line 2042 "ada-exp.tab.c"
+#line 2089 "ada-exp.c.tmp"
     break;
 
   case 70:
 #line 487 "ada-exp.y"
     { write_int (pstate, (yyvsp[0].lval), type_int (pstate));
 			  write_exp_elt_opcode (pstate, OP_ATR_FIRST); }
-#line 2049 "ada-exp.tab.c"
+#line 2096 "ada-exp.c.tmp"
     break;
 
   case 71:
 #line 490 "ada-exp.y"
     { write_int (pstate, (yyvsp[0].lval), type_int (pstate));
 			  write_exp_elt_opcode (pstate, OP_ATR_LAST); }
-#line 2056 "ada-exp.tab.c"
+#line 2103 "ada-exp.c.tmp"
     break;
 
   case 72:
 #line 493 "ada-exp.y"
     { write_int (pstate, (yyvsp[0].lval), type_int (pstate));
 			  write_exp_elt_opcode (pstate, OP_ATR_LENGTH); }
-#line 2063 "ada-exp.tab.c"
+#line 2110 "ada-exp.c.tmp"
     break;
 
   case 73:
 #line 496 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_ATR_SIZE); }
-#line 2069 "ada-exp.tab.c"
+#line 2116 "ada-exp.c.tmp"
     break;
 
   case 74:
 #line 498 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_ATR_TAG); }
-#line 2075 "ada-exp.tab.c"
+#line 2122 "ada-exp.c.tmp"
     break;
 
   case 75:
 #line 500 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_ATR_MIN); }
-#line 2081 "ada-exp.tab.c"
+#line 2128 "ada-exp.c.tmp"
     break;
 
   case 76:
 #line 502 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_ATR_MAX); }
-#line 2087 "ada-exp.tab.c"
+#line 2134 "ada-exp.c.tmp"
     break;
 
   case 77:
 #line 504 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_ATR_POS); }
-#line 2093 "ada-exp.tab.c"
+#line 2140 "ada-exp.c.tmp"
     break;
 
   case 78:
 #line 506 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_ATR_VAL); }
-#line 2099 "ada-exp.tab.c"
+#line 2146 "ada-exp.c.tmp"
     break;
 
   case 79:
 #line 508 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_ATR_MODULUS); }
-#line 2105 "ada-exp.tab.c"
+#line 2152 "ada-exp.c.tmp"
     break;
 
   case 80:
 #line 512 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 2111 "ada-exp.tab.c"
+#line 2158 "ada-exp.c.tmp"
     break;
 
   case 81:
 #line 514 "ada-exp.y"
     { (yyval.lval) = (yyvsp[-1].typed_val).val; }
-#line 2117 "ada-exp.tab.c"
+#line 2164 "ada-exp.c.tmp"
     break;
 
   case 82:
@@ -2123,7 +2170,7 @@ yyreduce:
 			  write_exp_elt_opcode (pstate, OP_TYPE);
 			  write_exp_elt_type (pstate, (yyvsp[0].tval));
 			  write_exp_elt_opcode (pstate, OP_TYPE); }
-#line 2128 "ada-exp.tab.c"
+#line 2175 "ada-exp.c.tmp"
     break;
 
   case 84:
@@ -2132,13 +2179,13 @@ yyreduce:
 			  write_exp_elt_type (pstate,
 					  parse_type (pstate)->builtin_void);
 			  write_exp_elt_opcode (pstate, OP_TYPE); }
-#line 2137 "ada-exp.tab.c"
+#line 2184 "ada-exp.c.tmp"
     break;
 
   case 85:
 #line 538 "ada-exp.y"
     { write_int (pstate, (LONGEST) (yyvsp[0].typed_val).val, (yyvsp[0].typed_val).type); }
-#line 2143 "ada-exp.tab.c"
+#line 2190 "ada-exp.c.tmp"
     break;
 
   case 86:
@@ -2148,7 +2195,7 @@ yyreduce:
 			       (type_qualifier == NULL) 
 			       ? (yyvsp[0].typed_val).type : type_qualifier);
 		  }
-#line 2153 "ada-exp.tab.c"
+#line 2200 "ada-exp.c.tmp"
     break;
 
   case 87:
@@ -2158,13 +2205,13 @@ yyreduce:
 			  write_exp_elt_floatcst (pstate, (yyvsp[0].typed_val_float).val);
 			  write_exp_elt_opcode (pstate, OP_FLOAT);
 			}
-#line 2163 "ada-exp.tab.c"
+#line 2210 "ada-exp.c.tmp"
     break;
 
   case 88:
 #line 558 "ada-exp.y"
     { write_int (pstate, 0, type_int (pstate)); }
-#line 2169 "ada-exp.tab.c"
+#line 2216 "ada-exp.c.tmp"
     break;
 
   case 89:
@@ -2172,37 +2219,37 @@ yyreduce:
     { 
 			  write_exp_op_with_string (pstate, OP_STRING, (yyvsp[0].sval));
 			}
-#line 2177 "ada-exp.tab.c"
+#line 2224 "ada-exp.c.tmp"
     break;
 
   case 90:
 #line 568 "ada-exp.y"
     { write_int (pstate, 1, type_boolean (pstate)); }
-#line 2183 "ada-exp.tab.c"
+#line 2230 "ada-exp.c.tmp"
     break;
 
   case 91:
 #line 570 "ada-exp.y"
     { write_int (pstate, 0, type_boolean (pstate)); }
-#line 2189 "ada-exp.tab.c"
+#line 2236 "ada-exp.c.tmp"
     break;
 
   case 92:
 #line 574 "ada-exp.y"
     { error (_("NEW not implemented.")); }
-#line 2195 "ada-exp.tab.c"
+#line 2242 "ada-exp.c.tmp"
     break;
 
   case 93:
 #line 578 "ada-exp.y"
     { (yyval.tval) = write_var_or_type (pstate, NULL, (yyvsp[0].sval)); }
-#line 2201 "ada-exp.tab.c"
+#line 2248 "ada-exp.c.tmp"
     break;
 
   case 94:
 #line 580 "ada-exp.y"
     { (yyval.tval) = write_var_or_type (pstate, (yyvsp[-1].bval), (yyvsp[0].sval)); }
-#line 2207 "ada-exp.tab.c"
+#line 2254 "ada-exp.c.tmp"
     break;
 
   case 95:
@@ -2214,7 +2261,7 @@ yyreduce:
 			  else
 			    (yyval.tval) = lookup_pointer_type ((yyval.tval));
 			}
-#line 2219 "ada-exp.tab.c"
+#line 2266 "ada-exp.c.tmp"
     break;
 
   case 96:
@@ -2226,19 +2273,19 @@ yyreduce:
 			  else
 			    (yyval.tval) = lookup_pointer_type ((yyval.tval));
 			}
-#line 2231 "ada-exp.tab.c"
+#line 2278 "ada-exp.c.tmp"
     break;
 
   case 97:
 #line 601 "ada-exp.y"
     { (yyval.bval) = block_lookup (NULL, (yyvsp[-1].sval).ptr); }
-#line 2237 "ada-exp.tab.c"
+#line 2284 "ada-exp.c.tmp"
     break;
 
   case 98:
 #line 603 "ada-exp.y"
     { (yyval.bval) = block_lookup ((yyvsp[-2].bval), (yyvsp[-1].sval).ptr); }
-#line 2243 "ada-exp.tab.c"
+#line 2290 "ada-exp.c.tmp"
     break;
 
   case 99:
@@ -2248,13 +2295,13 @@ yyreduce:
 			  write_exp_elt_longcst (pstate, (yyvsp[-1].lval));
 			  write_exp_elt_opcode (pstate, OP_AGGREGATE);
 		        }
-#line 2253 "ada-exp.tab.c"
+#line 2300 "ada-exp.c.tmp"
     break;
 
   case 100:
 #line 616 "ada-exp.y"
     { (yyval.lval) = (yyvsp[0].lval); }
-#line 2259 "ada-exp.tab.c"
+#line 2306 "ada-exp.c.tmp"
     break;
 
   case 101:
@@ -2264,13 +2311,13 @@ yyreduce:
 			  write_exp_elt_opcode (pstate, OP_POSITIONAL);
 			  (yyval.lval) = (yyvsp[-1].lval) + 1;
 			}
-#line 2269 "ada-exp.tab.c"
+#line 2316 "ada-exp.c.tmp"
     break;
 
   case 102:
 #line 624 "ada-exp.y"
     { (yyval.lval) = (yyvsp[-1].lval) + (yyvsp[0].lval); }
-#line 2275 "ada-exp.tab.c"
+#line 2322 "ada-exp.c.tmp"
     break;
 
   case 103:
@@ -2280,7 +2327,7 @@ yyreduce:
 			  write_exp_elt_opcode (pstate, OP_POSITIONAL);
 			  (yyval.lval) = 1;
 			}
-#line 2285 "ada-exp.tab.c"
+#line 2332 "ada-exp.c.tmp"
     break;
 
   case 104:
@@ -2290,31 +2337,31 @@ yyreduce:
 			  write_exp_elt_opcode (pstate, OP_POSITIONAL);
 			  (yyval.lval) = (yyvsp[-2].lval) + 1; 
 			}
-#line 2295 "ada-exp.tab.c"
+#line 2342 "ada-exp.c.tmp"
     break;
 
   case 105:
 #line 643 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 2301 "ada-exp.tab.c"
+#line 2348 "ada-exp.c.tmp"
     break;
 
   case 106:
 #line 644 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 2307 "ada-exp.tab.c"
+#line 2354 "ada-exp.c.tmp"
     break;
 
   case 107:
 #line 646 "ada-exp.y"
     { (yyval.lval) = (yyvsp[0].lval) + 1; }
-#line 2313 "ada-exp.tab.c"
+#line 2360 "ada-exp.c.tmp"
     break;
 
   case 108:
 #line 650 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_OTHERS); }
-#line 2319 "ada-exp.tab.c"
+#line 2366 "ada-exp.c.tmp"
     break;
 
   case 109:
@@ -2324,25 +2371,25 @@ yyreduce:
 			  write_exp_elt_longcst (pstate, (yyvsp[0].lval));
 			  write_exp_elt_opcode (pstate, OP_CHOICES);
 		        }
-#line 2329 "ada-exp.tab.c"
+#line 2376 "ada-exp.c.tmp"
     break;
 
   case 110:
 #line 669 "ada-exp.y"
     { write_name_assoc (pstate, (yyvsp[-1].sval)); }
-#line 2335 "ada-exp.tab.c"
+#line 2382 "ada-exp.c.tmp"
     break;
 
   case 111:
 #line 670 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 2341 "ada-exp.tab.c"
+#line 2388 "ada-exp.c.tmp"
     break;
 
   case 112:
 #line 672 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 2347 "ada-exp.tab.c"
+#line 2394 "ada-exp.c.tmp"
     break;
 
   case 113:
@@ -2351,65 +2398,65 @@ yyreduce:
 			  write_exp_op_with_string (pstate, OP_NAME,
 						    empty_stoken);
 			}
-#line 2356 "ada-exp.tab.c"
+#line 2403 "ada-exp.c.tmp"
     break;
 
   case 114:
 #line 678 "ada-exp.y"
     { (yyval.lval) = 1; }
-#line 2362 "ada-exp.tab.c"
+#line 2409 "ada-exp.c.tmp"
     break;
 
   case 115:
 #line 680 "ada-exp.y"
     { write_name_assoc (pstate, (yyvsp[-1].sval)); }
-#line 2368 "ada-exp.tab.c"
+#line 2415 "ada-exp.c.tmp"
     break;
 
   case 116:
 #line 681 "ada-exp.y"
     { (yyval.lval) = (yyvsp[0].lval) + 1; }
-#line 2374 "ada-exp.tab.c"
+#line 2421 "ada-exp.c.tmp"
     break;
 
   case 117:
 #line 683 "ada-exp.y"
     { (yyval.lval) = (yyvsp[0].lval) + 1; }
-#line 2380 "ada-exp.tab.c"
+#line 2427 "ada-exp.c.tmp"
     break;
 
   case 118:
 #line 685 "ada-exp.y"
     { write_exp_elt_opcode (pstate, OP_DISCRETE_RANGE); }
-#line 2386 "ada-exp.tab.c"
+#line 2433 "ada-exp.c.tmp"
     break;
 
   case 119:
 #line 686 "ada-exp.y"
     { (yyval.lval) = (yyvsp[0].lval) + 1; }
-#line 2392 "ada-exp.tab.c"
+#line 2439 "ada-exp.c.tmp"
     break;
 
   case 120:
 #line 693 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_IND); }
-#line 2398 "ada-exp.tab.c"
+#line 2445 "ada-exp.c.tmp"
     break;
 
   case 121:
 #line 695 "ada-exp.y"
     { write_exp_elt_opcode (pstate, UNOP_ADDR); }
-#line 2404 "ada-exp.tab.c"
+#line 2451 "ada-exp.c.tmp"
     break;
 
   case 122:
 #line 697 "ada-exp.y"
     { write_exp_elt_opcode (pstate, BINOP_SUBSCRIPT); }
-#line 2410 "ada-exp.tab.c"
+#line 2457 "ada-exp.c.tmp"
     break;
 
 
-#line 2414 "ada-exp.tab.c"
+#line 2461 "ada-exp.c.tmp"
 
       default: break;
     }
@@ -3037,11 +3084,10 @@ static void
 write_ambiguous_var (struct parser_state *par_state,
 		     const struct block *block, char *name, int len)
 {
-  struct symbol *sym = XOBNEW (&temp_parse_space, struct symbol);
+  struct symbol *sym = new (&temp_parse_space) symbol ();
 
-  memset (sym, 0, sizeof (struct symbol));
   SYMBOL_DOMAIN (sym) = UNDEF_DOMAIN;
-  SYMBOL_LINKAGE_NAME (sym) = obstack_strndup (&temp_parse_space, name, len);
+  sym->set_linkage_name (obstack_strndup (&temp_parse_space, name, len));
   SYMBOL_LANGUAGE (sym) = language_ada;
 
   write_exp_elt_opcode (par_state, OP_VAR_VALUE);

@@ -43,7 +43,7 @@ extern void (*write_reg_cb)(void *sp, uint32_t addr, uint32_t val);
 
 // C++ only routines that get called from systemC
 extern void sim_emulation_start_gdb(
-	       int argc, char **argv,
+	       int argc, char **argv, bool batch_mode,
 	       char *progname2,
 	       void *gdbServiceProcessor,
 	       void (*register_sd)(void *sp, void *sd),
