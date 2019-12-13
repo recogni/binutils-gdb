@@ -42,6 +42,7 @@ void (*register_sd_cb)(void *, void *) = NULL;
 sim_emulation_rupts_t (*tick_cb)(void *, int) = NULL;
 uint32_t (*read_reg_cb)(void *sp, uint32_t addr) = NULL;
 void (*write_reg_cb)(void *sp, uint32_t addr, uint32_t val) = NULL;
+int done_flag;
 
 /* List of SDs */
 struct sim_state *sim_state_head = NULL;
@@ -74,7 +75,7 @@ sim_engine_run (SIM_DESC start_sd,
   
   while (1) {
       if (sd == start_sd) {
-	  if (sd->tick_cb != NULL) {
+	  if ((done_flag == 0) && (sd->tick_cb != NULL)) {
 	      SIM_DESC rupt_sd = sim_state_head;
 	      sim_emulation_rupts_t rupts;
 	      rupts = sd->tick_cb(sd->gdbSP, 1);
@@ -115,13 +116,15 @@ sim_engine_run (SIM_DESC start_sd,
 	  engine->jmpbuf = NULL;
       }
       
-      //      if (strcmp(get_inferior_args(),"all") == 0) {
       sd = sd->sim_state_next;
       if (sd == NULL) {
 	  sd = sim_state_head;
       }
-      //      }
       cpu = STATE_CPU (sd, 0);
+
+      if (done_flag) {
+	  sim_engine_halt(sd, cpu, NULL, sim_pc_get(cpu), sim_exited, 0);
+      } 
 
   }
 

@@ -37,6 +37,7 @@ extern void (*register_sd_cb)(void *, void *);
 extern sim_emulation_rupts_t (*tick_cb)(void *, int);
 extern uint32_t (*read_reg_cb)(void *sp, uint32_t addr);
 extern void (*write_reg_cb)(void *sp, uint32_t addr, uint32_t val);
+extern int done_flag;    
 
 #ifdef __cplusplus
 } // extern "C"

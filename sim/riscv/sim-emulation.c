@@ -21,17 +21,35 @@ bool batch_option;
 
 static
 void sim_gdb_thread(void) {
+    char cmd[160];
     gdb_main(&args);			// Initialize GDB
-    gdbsim_target_open(NULL, 0);  	// "target sim" comand
-    target_load(prog_name1, 0);		// Load
-    starti_command(prog_name1, 0);	// Start program1
-    add_inferior_exec(prog_name2);
-    inferior_command("2", 0);           // Switch to inferior 2
-    target_load(prog_name2, 0);		// Load
+    execute_command("target sim", 0);
+    
+    strcpy(cmd, "load ");
+    strcat(cmd, prog_name1);
+    execute_command(cmd, 0);
+
+    strcpy(cmd, "starti ");
+    strcat(cmd, prog_name1);
+    execute_command(cmd, 0);
+
+    strcpy(cmd, "add-inferior -exec ");
+    strcat(cmd, prog_name2);
+    execute_command(cmd, 0);
+
+    execute_command("inferior 2", 0);
+    
+    strcpy(cmd, "load ");
+    strcat(cmd, prog_name2);
+    execute_command(cmd, 0);
+
+    strcpy(cmd, "starti ");
+    strcat(cmd, prog_name2);
+    execute_command(cmd, 0);
+
      if (batch_option) {
-	 run_command(prog_name2, 0);	// run program 2	
+	 execute_command("continue", 0);  // let 'er rip
     } else {
-	 starti_command(prog_name2, 0);	// Start program 2
 	 command_loop();                // Process commands
     }
 }
@@ -59,11 +77,13 @@ void sim_emulation_start_gdb(int argc, char **argv, bool batch_mode,
     register_sd_cb = register_sd;
     read_reg_cb = read_reg;
     write_reg_cb = write_reg;
+    done_flag = 0;
 
     gdb_cmd_thread = std::thread(sim_gdb_thread);
 }
 
 void sim_emulation_fini(void) {
+    done_flag = 0;
 }
     
 int sim_emulation_mem_write(uint32_t addr, uint32_t *val, int size) {

@@ -507,8 +507,6 @@ public:
 
 DECLARE_REGISTRY (inferior);
 
-extern void add_inferior_exec (const char *exec);
-
 /* Add an inferior to the inferior list, print a message that a new
    inferior is found, and return the pointer to the new inferior.
    Caller may use this pointer to initialize the private inferior
@@ -648,10 +646,5 @@ extern struct inferior *add_inferior_with_spaces (void);
 
 /* Print the current selected inferior.  */
 extern void print_selected_inferior (struct ui_out *uiout);
-
-// Added for sim-emulation
-extern void run_command (const char *args, int from_tty);
-extern void starti_command (const char *args, int from_tty);
-extern void inferior_command (const char *args, int from_tty);
 
 #endif /* !defined (INFERIOR_H) */
