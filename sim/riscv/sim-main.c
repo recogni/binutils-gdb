@@ -2417,6 +2417,12 @@ step_once (SIM_CPU *cpu)
       return;
   } 
   
+  if (sd->ext_rupt.sim_shutdown) {
+      // Kill the current GDB
+      sim_engine_halt (sd, cpu, NULL, pc, sim_stopped, SIM_SIGTRAP); \
+
+  } 
+  
   if (sd->ext_rupt.ext_rupt) {
       /* Set external interrupt pending bit */
       cpu->csr.mip |= 1 << 11;
@@ -2485,8 +2491,12 @@ step_once (SIM_CPU *cpu)
   if (!op)
     sim_engine_halt (sd, cpu, NULL, pc, sim_signalled, SIM_SIGILL);
 
-  for (; op->name; op++)
+  for (;; op++)
     {
+      if (!op->name) {
+	  sim_engine_halt (sd, cpu, NULL, pc, sim_signalled, SIM_SIGILL);
+	  break;
+      } 
       /* Does the opcode match?  */
       if (!(op->match_func) (op, iw))
 	continue;

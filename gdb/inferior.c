@@ -832,6 +832,21 @@ clone_inferior_command (const char *args, int from_tty)
     }
 }
 
+static void
+exit_inferior_command (const char *args, int from_tty)
+{
+  struct inferior *inf;
+  int num;
+
+  num = parse_and_eval_long (args);
+
+  inf = find_inferior_id (num);
+  if (inf == NULL)
+    error (_("Inferior ID %d not known."), num);
+
+  exit_inferior_silent(inf);
+}
+
 /* Print notices when new inferiors are created and die.  */
 static void
 show_print_inferior_events (struct ui_file *file, int from_tty,
@@ -905,6 +920,11 @@ Add N copies of inferior ID.  The new inferior has the same\n\
 executable loaded as the copied inferior.  If -copies is not specified,\n\
 adds 1 copy.  If ID is not specified, it is the current inferior\n\
 that is cloned."));
+
+  add_com ("exit-inferior", no_class, exit_inferior_command, _("\
+Exit inferior ID.\n\
+Usage: exit-inferior [ID]\n\
+Exit inferior ID."));
 
   add_cmd ("inferiors", class_run, detach_inferior_command, _("\
 Detach from inferior ID (or list of IDS).\n\

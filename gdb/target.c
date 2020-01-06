@@ -561,7 +561,11 @@ target_stack::push (target_ops *t)
   /* If there's already a target at this stratum, remove it.  */
   strata stratum = t->stratum ();
 
+#ifdef RECOGNI_GDB
   if (m_stack[stratum] != NULL)
+#else  
+      if ((m_stack[stratum] != NULL) && (stratum != dummy_stratum))
+#endif  
     unpush (m_stack[stratum]);
 
   /* Now add the new one.  */

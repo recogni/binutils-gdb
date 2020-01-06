@@ -19,11 +19,12 @@ extern "C"
  */
 typedef union sim_emulation_rupt {
     struct {
+	unsigned sim_shutdown:1;
 	unsigned ext_rupt:1;
 	unsigned timer_rupt:1;
 	unsigned reset:1;
 	unsigned halt:1;
-	unsigned unused:4;
+	unsigned unused:3;
     };
     uint8_t rupt_bits;
 } sim_emulation_rupt_t;
@@ -54,6 +55,7 @@ extern void sim_emulation_start_gdb(
 				);
 
 extern void sim_emulation_fini(void);
+extern void sim_emulation_kill(void);
 
 extern int sim_emulation_mem_write(uint32_t addr, uint32_t *val, int size);
 extern int sim_emulation_mem_read(uint32_t addr, uint32_t *val, int size);

@@ -1680,17 +1680,21 @@ undo_terminal_modifications_before_exit (void)
 void
 quit_force (int *exit_arg, int from_tty)
 {
+#ifdef RECOGNI_GDB    
   int exit_code = 0;
+#endif  
   struct qt_args qt;
 
   undo_terminal_modifications_before_exit ();
 
+#ifdef RECOGNI_GDB    
   /* An optional expression may be used to cause gdb to terminate with the
      value of that expression.  */
   if (exit_arg)
     exit_code = *exit_arg;
   else if (return_child_result)
     exit_code = return_child_result_value;
+#endif  
 
   qt.from_tty = from_tty;
 
@@ -1762,7 +1766,9 @@ quit_force (int *exit_arg, int from_tty)
       exception_print (gdb_stderr, ex);
     }
 
+#ifdef RECOGNI_GDB  
   exit (exit_code);
+#endif  
 }
 
 /* The value of the "interactive-mode" setting.  */

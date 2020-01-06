@@ -34,6 +34,8 @@
 #include "main.h"
 
 #include "sim-main.h"
+#include "sim-module.h"
+#include "gdb/remote-sim.h"
 #include "sim-options.h"
 #include "sim-emulation.h"
 
@@ -46,7 +48,6 @@ int done_flag;
 
 /* List of SDs */
 struct sim_state *sim_state_head = NULL;
-struct sim_state *sim_state_cur = NULL;
 
 
 /* This function is the main loop.  It should process ticks and decode+execute
@@ -56,80 +57,45 @@ struct sim_state *sim_state_cur = NULL;
   int tick_cnt = 0;
 
 void
-sim_engine_run (SIM_DESC start_sd,
+sim_engine_run (SIM_DESC sd,
 		int next_cpu_nr, /* ignore  */
 		int nr_cpus, /* ignore  */
 		int siggnal) /* ignore  */
 {
   SIM_CPU *cpu;
-  SIM_DESC sd = start_sd;
-  sim_engine *start_engine = STATE_ENGINE(sd);
-  jmp_buf *save_jmp;
-  jmp_buf jmpbuf;
-  int jmpval;
+  sim_engine *engine = STATE_ENGINE(sd);
   
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   cpu = STATE_CPU (sd, 0);
 
-  save_jmp = start_engine->jmpbuf;
-  
-  while (1) {
-      if (sd == start_sd) {
-	  if ((done_flag == 0) && (sd->tick_cb != NULL)) {
-	      SIM_DESC rupt_sd = sim_state_head;
-	      sim_emulation_rupts_t rupts;
-	      rupts = sd->tick_cb(sd->gdbSP, 1);
-	      tick_cnt++;
-	      for (int i = 0; i < 4; i++) {
-		  rupt_sd->ext_rupt = rupts.proc[i];
-		  rupt_sd = rupt_sd->sim_state_next;
-		  if (rupt_sd == NULL) {
-		      break;
-		  } 
-	      } 
+  if ((sd == sim_state_head->sim_state_next) && (done_flag == 0) &&
+      (sd->tick_cb != NULL)) {
+      // Tick the systemC clock
+      SIM_DESC rupt_sd = sd;
+      sim_emulation_rupts_t rupts;
+      rupts = sd->tick_cb(sd->gdbSP, 1);
+      tick_cnt++;
+      for (int i = 0; i < 4; i++) {
+	  rupt_sd->ext_rupt = rupts.proc[i];
+	  rupt_sd = rupt_sd->sim_state_next;
+	  if (rupt_sd == NULL) {
+	      break;
 	  } 
-      }
-
-      sim_state_cur = sd;
-      if (cpu) {
-	  sim_engine *engine = STATE_ENGINE(sd);
-	  engine->jmpbuf = &jmpbuf;
-	  jmpval = setjmp(jmpbuf);
-	  if (jmpval == sim_engine_halt_jmpval) {
-	      // Transfer data to original SD
-	      if (start_engine != engine) {
-		  start_engine->last_cpu = engine->last_cpu;
-		  start_engine->next_cpu = engine->next_cpu;
-		  start_engine->reason = engine->reason;
-		  start_engine->sigrc = engine->sigrc;
-		  engine->jmpbuf = NULL;
-	      }
-	      start_engine->jmpbuf = save_jmp;
-	      longjmp(*save_jmp, jmpval);
-	  }
-
-	  step_once (cpu);
-	  if (sim_events_tick (sd)) {
-	      sim_events_process (sd);
-	  }
-      
-	  engine->jmpbuf = NULL;
-      }
-      
-      sd = sd->sim_state_next;
-      if (sd == NULL) {
-	  sd = sim_state_head;
-      }
-      cpu = STATE_CPU (sd, 0);
-
-      if (done_flag) {
-	  sim_engine_halt(sd, cpu, NULL, sim_pc_get(cpu), sim_exited, 0);
       } 
-
+  } 
+  
+  if (cpu) {
+      step_once (cpu);
+      if (sim_events_tick (sd)) {
+	  sim_events_process (sd);
+      }
+  }
+      
+  if (done_flag) {
+      engine->reason = sim_exited;
+      engine->sigrc = 0;
   }
 
-  // Some SD hit a jmpbuf
-  
 }
 
 /* Initialize the simulator from scratch.  This is called once per lifetime of
@@ -166,6 +132,51 @@ alloc_mem (SIM_DESC sd)
   return;
 }
 
+#ifndef SIM_CLOSE_HOOK
+# define SIM_CLOSE_HOOK(sd, quitting)
+#endif
+
+void
+sim_close (SIM_DESC sd, int quitting)
+{
+  SIM_CLOSE_HOOK (sd, quitting);
+
+  /* If cgen is active, close it down.  */
+#ifdef CGEN_ARCH
+# define cgen_cpu_close XCONCAT2 (CGEN_ARCH,_cgen_cpu_close)
+  cgen_cpu_close (CPU_CPU_DESC (STATE_CPU (sd, 0)));
+#endif
+
+  /* Shut down all registered/active modules.  */
+  sim_module_uninstall (sd);
+
+  /* Ensure that any resources allocated through the callback
+     mechanism are released.  */
+  sim_io_shutdown (sd);
+
+  /* Break down all of the cpus.  */
+  sim_cpu_free_all (sd);
+
+  /* Unlink */
+  if (sim_state_head == sd) {
+      sim_state_head = sd->sim_state_next;
+  } else {
+      // Walk the chain to find the last
+      SIM_DESC esd;
+      for (esd = sim_state_head; esd->sim_state_next != NULL;
+	   esd = esd->sim_state_next) {
+	  if (esd->sim_state_next == sd) {
+	      esd->sim_state_next = sd->sim_state_next;
+	      break;
+	  } 
+      }
+  } 
+  sd->sim_state_next = NULL;
+
+  /* Finally break down the sim state itself.  */
+  sim_state_free (sd);
+}
+
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
@@ -174,6 +185,19 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   char c;
   int i;
   SIM_DESC sd = sim_state_alloc (kind, callback);
+
+  /* Link them up back to front */
+  sd->sim_state_next = NULL;
+  if (sim_state_head == NULL) {
+      sim_state_head = sd;
+  } else {
+      // Walk the chain to find the last
+      SIM_DESC esd;
+      for (esd = sim_state_head; esd->sim_state_next != NULL;
+	   esd = esd->sim_state_next) {
+      }
+      esd->sim_state_next = sd;
+  } 
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
@@ -273,19 +297,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   Elf_Internal_Phdr *phdr;
   int i, phnum;
 
-  /* Link them up back to front */
-  sd->sim_state_next = NULL;
-  if (sim_state_head == NULL) {
-      sim_state_head = sd;
-  } else {
-      // Walk the chain to find the last
-      SIM_DESC esd;
-      for (esd = sim_state_head; esd->sim_state_next != NULL;
-	   esd = esd->sim_state_next) {
-      }
-      esd->sim_state_next = sd;
-  } 
-  
   /* Copy the systemC callback info out of the static variables */
   sd->gdbSP = gdbSP;
   sd->tick_cb = tick_cb;
