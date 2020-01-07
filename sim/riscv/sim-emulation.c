@@ -137,7 +137,9 @@ void sim_emulation_start_gdb(int argc, char **argv, bool batch_mode,
 void sim_emulation_fini(void) {
     gdb_em_fini++;
     done_flag = 1;
-    gdb_cmd_thread.join();
+    if (gdb_cmd_thread.joinable()) {
+	gdb_cmd_thread.join();
+    }
     gdb_em_fini_end++;
 }
     
