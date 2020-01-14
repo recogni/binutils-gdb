@@ -3840,6 +3840,13 @@ subdirs="$subdirs aarch64"
 
 
        ;;
+   riscv64*-*-*)
+
+  sim_arch=riscv64
+  subdirs="$subdirs riscv"
+
+
+       ;;
    riscv*-*-*)
 
   sim_arch=riscv32

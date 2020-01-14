@@ -14109,6 +14109,7 @@ fi
 riscv_model=
 case "${target}" in
 riscv32*) riscv_model="RV32G" ;;
+riscv64*) riscv_model="RV64G" ;;
 riscv*) riscv_model="RV64G" ;;
 esac
 
@@ -14132,6 +14133,7 @@ fi
 riscv_addr_bitsize=
 case "${target}" in
 riscv32*) riscv_addr_bitsize=32 ;;
+riscv64*) riscv_addr_bitsize=64 ;;
 riscv*) riscv_addr_bitsize=64 ;;
 esac
 wire_word_bitsize="$riscv_addr_bitsize"
