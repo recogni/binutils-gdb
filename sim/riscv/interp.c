@@ -121,13 +121,13 @@ alloc_mem (SIM_DESC sd)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* Flash (executable space) - 2M (probably lots more)*/
-  sim_core_attach(sd, NULL, 0, access_read_write_exec, 0, 0x20400000, 0x200000,
+  sim_core_attach(sd, NULL, 0, access_read_write_exec, 0, 0x10400000, 0x200000,
 		  0, NULL, NULL);
-  /* Data - 16K (???) */
-  sim_core_attach(sd, NULL, 0, access_read_write, 0, 0x80000000, 0x10000,
+  /* Data - 64K (???) */
+  sim_core_attach(sd, NULL, 0, access_read_write, 0, 0x20000000, 0x40000,
 		  0, NULL, NULL);
   /* External registers */
-  sim_core_attach(sd, NULL, 0, access_read_write, 0, 0x100, 0x10000,
+  sim_core_attach(sd, NULL, 0, access_read_write, 0, 0x40000000, 0x10000,
 		  0, (struct hw*) 0xffffffff, NULL);
   return;
 }
